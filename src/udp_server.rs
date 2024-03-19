@@ -62,7 +62,13 @@ impl Server {
                     };
                     self.socket
                         .send_to(&response.to_bytes(), return_addr)?;
+                } else {
+                    self.socket
+                        .send_to(&[1u8; 32], return_addr)?;
                 }
+            } else {
+                self.socket
+                    .send_to(&[2u8; 32], return_addr)?;
             }
         }
     }
