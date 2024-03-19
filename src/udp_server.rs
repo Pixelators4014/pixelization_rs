@@ -48,29 +48,31 @@ impl Server {
         println!("Listening on {}", self.socket.local_addr()?);
         loop {
             let mut buf = [0u8; 32];
-            let (_size, return_addr) = self.socket.recv_from(buf.as_mut())?;
-            println!("Request from {}", return_addr);
-            if let Some(msg) = self.data.lock().unwrap().as_ref() {
-                if let Some(last) = msg.poses.last() {
-                    let response = Response {
-                        header: 0,
-                        x: last.pose.position.x as f32,
-                        y: last.pose.position.y as f32,
-                        z: last.pose.position.z as f32,
-                        angle_x: last.pose.orientation.x as f32,
-                        angle_y: last.pose.orientation.y as f32,
-                        angle_z: last.pose.orientation.z as f32,
-                        angle_w: last.pose.orientation.w as f32,
-                    };
-                    self.socket
-                        .send_to(&response.to_bytes(), return_addr)?;
+            if let Ok(req) = self.socket.recv_from(buf.as_mut()) {
+                let (_size, return_addr) = req;
+                println!("Request from {}", return_addr);
+                if let Some(msg) = self.data.lock().unwrap().as_ref() {
+                    if let Some(last) = msg.poses.last() {
+                        let response = Response {
+                            header: 0,
+                            x: last.pose.position.x as f32,
+                            y: last.pose.position.y as f32,
+                            z: last.pose.position.z as f32,
+                            angle_x: last.pose.orientation.x as f32,
+                            angle_y: last.pose.orientation.y as f32,
+                            angle_z: last.pose.orientation.z as f32,
+                            angle_w: last.pose.orientation.w as f32,
+                        };
+                        self.socket
+                            .send_to(&response.to_bytes(), return_addr)?;
+                    } else {
+                        self.socket
+                            .send_to(&[1u8; 32], return_addr)?;
+                    }
                 } else {
                     self.socket
-                        .send_to(&[1u8; 32], return_addr)?;
+                        .send_to(&[2u8; 32], return_addr)?;
                 }
-            } else {
-                self.socket
-                    .send_to(&[2u8; 32], return_addr)?;
             }
         }
     }
