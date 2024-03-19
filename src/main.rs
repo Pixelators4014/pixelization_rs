@@ -3,6 +3,7 @@ use nav_msgs::msg::Path as PathMsg;
 
 struct NetworkNode {
     node: Arc<rclrs::Node>,
+    #[allow(dead_code)]
     subscription: Arc<rclrs::Subscription<PathMsg>>,
     data: Arc<Mutex<Option<PathMsg>>>,
 }
