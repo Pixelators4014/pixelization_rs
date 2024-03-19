@@ -24,9 +24,10 @@ RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://githu
 WORKDIR /workspaces/isaac_ros-dev
 
 # Copy files
-COPY ~/workspaces/isaac_ros-dev /workspaces/isaac_ros-dev
+COPY . .
 
-RUN ls ../
+RUN ls ../..
+RUN ls ..
 RUN ls .
 
 # Build the ROS workspace
