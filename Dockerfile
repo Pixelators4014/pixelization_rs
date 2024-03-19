@@ -27,6 +27,7 @@ WORKDIR /workspaces/isaac_ros-dev
 # COPY ../../ .
 
 RUN ls ../
+RUN ls .
 
 # Build the ROS workspace
 # RUN ls ..
