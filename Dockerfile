@@ -39,7 +39,8 @@ WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
 RUN /bin/bash -c 'vcs import src < src/ros2_rust/ros2_rust_humble.repos; source /opt/ros/humble/setup.bash; colcon build --symlink-install --packages-up-to pixelization_rs'
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 
 # # TODO: Add the entrypoint
-# CMD [ "ros2", "launch", "isaac_ros_visual_slam", "isaac_ros_visual_slam_realsense.launch.py" ]
+CMD [ "ros2", "launch", "isaac_ros_visual_slam", "isaac_ros_visual_slam_realsense.launch.py" ]
