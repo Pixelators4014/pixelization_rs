@@ -1,11 +1,6 @@
 # Use the specified Isaac ROS base image
 FROM nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_b7e1ed6c02a6fa3c1c7392479291c035
 
-# set user
-ARG USERNAME=admin
-ARG USER_UID=1000
-ARG USER_GID=1000
-
 # Run the required commands
 RUN apt update \
     && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
