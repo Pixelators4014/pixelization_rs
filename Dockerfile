@@ -29,7 +29,7 @@ RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam
 RUN git clone https://github.com/ros2-rust/ros2_rust
 RUN git clone https://github.com/IntelRealSense/realsense-ros
-RUN git clone https://github.com/Pixelators4014/pixelization_rs
+COPY . pixelization_rs
 
 # Copy files
 COPY /usr/bin/tegrastats /usr/bin/tegrastats
