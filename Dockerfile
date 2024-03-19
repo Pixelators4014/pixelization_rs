@@ -13,7 +13,7 @@ RUN apt update && apt install -y \
     libclang-dev python3-pip python3-vcstool \
     && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
     && sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u \
-    && sudo apt install librealsense2-utils librealsense2-dev \
+    && sudo apt install -y librealsense2-utils librealsense2-dev \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Install rust
