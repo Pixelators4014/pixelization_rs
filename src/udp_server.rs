@@ -45,6 +45,7 @@ impl Server {
     }
 
     pub(crate) fn run(&mut self) -> io::Result<()> {
+        println!("Listening on {}", self.socket.local_addr()?);
         loop {
             let mut buf = [0u8; 32];
             let (_size, return_addr) = self.socket.recv_from(buf.as_mut())?;
