@@ -52,13 +52,13 @@ impl Server {
                 if let Some(last) = msg.poses.last() {
                     let response = Response {
                         header: 0,
-                        x: last.pose.position.x,
-                        y: last.pose.position.y,
-                        z: last.pose.position.z,
-                        angle_x: last.pose.orientation.x,
-                        angle_y: last.pose.orientation.y,
-                        angle_z: last.pose.orientation.z,
-                        angle_w: last.pose.orientation.w,
+                        x: last.pose.position.x as f32,
+                        y: last.pose.position.y as f32,
+                        z: last.pose.position.z as f32,
+                        angle_x: last.pose.orientation.x as f32,
+                        angle_y: last.pose.orientation.y as f32,
+                        angle_z: last.pose.orientation.z as f32,
+                        angle_w: last.pose.orientation.w as f32,
                     };
                     self.socket
                         .send_to(&response.to_bytes(), return_addr)?;
