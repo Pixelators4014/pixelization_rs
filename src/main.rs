@@ -38,7 +38,7 @@ fn main() -> Result<(), rclrs::RclrsError> {
     std::thread::spawn(move || {
         loop {
             if let Some(msg) = data.lock().unwrap().take() {
-                println!("{:?}", msg);
+                println!("{:?}", msg.poses.last());
             }
         }
     });
