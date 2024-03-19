@@ -40,7 +40,7 @@ fn now_millis() -> u32 {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
         .as_millis();
-    let modded = time % 2_i32.pow(31);
+    let modded = time % 2_u128.pow(31);
     modded as u32
 }
 
