@@ -10,7 +10,8 @@ struct NetworkNode {
 impl NetworkNode {
     fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
-        let data = None;
+        let data = Arc::new(Mutex::new(None));
+        let data_cb = Arc::clone(&data);
         let subscription = {
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
