@@ -10,7 +10,8 @@ RUN apt update && apt install -y \
     ros-humble-isaac-ros-detectnet \
     ros-humble-isaac-ros-triton \
     ros-humble-isaac-ros-apriltag \
-    libclang-dev python3-pip python3-vcstool
+    libclang-dev python3-pip python3-vcstool &&\
+    apt clean && rm -rf /var/lib/apt/lists/*
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
