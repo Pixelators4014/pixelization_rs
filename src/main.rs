@@ -33,5 +33,13 @@ impl NetworkNode {
 fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
+    let data = Arc::clone(&network_node.data);
+    std::thread::spawn(move || {
+        loop {
+            if let Some(msg) = data.lock().unwrap().take() {
+                println!("{:?}", msg);
+            }
+        }
+    });
     rclrs::spin(Arc::clone(&network_node.node))
 }
