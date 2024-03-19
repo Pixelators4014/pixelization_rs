@@ -48,6 +48,7 @@ impl Server {
         loop {
             let mut buf = [0u8; 32];
             let (_size, return_addr) = self.socket.recv_from(buf.as_mut())?;
+            println!("Request from {}", return_addr);
             if let Some(msg) = self.data.lock().unwrap().as_ref() {
                 if let Some(last) = msg.poses.last() {
                     let response = Response {
