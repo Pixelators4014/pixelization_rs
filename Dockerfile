@@ -37,7 +37,7 @@ COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11 /usr/local
 WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
-RUN /bin/bash -c 'vcs import src < src/ros2_rust/ros2_rust_humble.repos; source /opt/ros/humble/setup.bash; colcon build --symlink-install --packages-up-to pixelization_rs'
+RUN /bin/bash -c 'vcs import src < src/ros2_rust/ros2_rust_humble.repos; source /opt/ros/humble/setup.bash; source ~/.cargo/env; colcon build --symlink-install --packages-up-to pixelization_rs'
 
 # # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", "source ~/.cargo/env; source /opt/ros/humble/setup.bash && source /workspaces/isaac_ros-dev/install/setup.bash && ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py" ]
