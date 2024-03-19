@@ -12,7 +12,7 @@ impl NetworkNode {
         let node = rclrs::Node::new(context, "network_node")?;
         let data = Arc::new(Mutex::new(None));
         let data_cb = Arc::clone(&data);
-        let subscription = {
+        let subscription =
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
                 "/visual_slam/tracking/slam_path",
@@ -21,8 +21,7 @@ impl NetworkNode {
                     // This subscription now owns the data_cb variable
                     *data_cb.lock().unwrap() = Some(msg);
                 },
-            )?
-        };
+            )?;
         Ok(Self {
             node,
             subscription,
