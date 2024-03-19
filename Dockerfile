@@ -24,7 +24,7 @@ RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://githu
 WORKDIR /workspaces/isaac_ros-dev
 
 # Copy files
-# COPY ../../ .
+COPY ../../ .
 
 RUN ls ../
 RUN ls .
