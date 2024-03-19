@@ -4,7 +4,7 @@ use nav_msgs::msg::Path as PathMsg;
 struct NetworkNode {
     node: Arc<rclrs::Node>,
     subscription: Arc<rclrs::Subscription<PathMsg>>,
-    data: Option<Arc<Mutex<PathMsg>>>,
+    data: Arc<Mutex<Option<PathMsg>>>,
 }
 
 impl NetworkNode {
