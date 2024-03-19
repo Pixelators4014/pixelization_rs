@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model
+   href="http://download.ros.org/schema/package_format3.xsd"
+   schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>pixelization_rs</name>
+  <version>0.1.0</version>
+  <description>FRC + ROS2, but Rust 0_0.</description>
+  <maintainer email="arihant2math@gmail.com">Ashwin Naren</maintainer>
+  <license>MIT License</license>
+
+  <build_depend>rclrs</build_depend>
+  <build_depend>rosidl_runtime_rs</build_depend>
+
+  <exec_depend>rclrs</exec_depend>
+  <exec_depend>rosidl_runtime_rs</exec_depend>
+
+  <export>
+    <build_type>ament_cargo</build_type>
+  </export>
+</package>
