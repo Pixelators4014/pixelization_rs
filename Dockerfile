@@ -15,7 +15,7 @@ RUN apt update && apt install -y \
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN cargo install cargo-ament-build
+RUN source $HOME/.cargo/env && cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Set the working directory to the isaac_ros-dev workspace
