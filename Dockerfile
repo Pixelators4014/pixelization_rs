@@ -20,7 +20,12 @@ RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://githu
 # Set the working directory to the isaac_ros-dev workspace
 WORKDIR /workspaces/isaac_ros-dev
 
+# Copy files
+COPY ../.. .
+
 # Build the ROS workspace
-# RUN /bin/bash -c '. /opt/ros/humble/setup.bash; colcon build --symlink-install'
 RUN colcon build --symlink-install
 RUN echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
+
+# TODO: Add the entrypoint
+CMD [ "ros2", "launch", "isaac_ros_visual_slam", "isaac_ros_visual_slam_realsense.launch.py" ]
