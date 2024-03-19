@@ -21,14 +21,16 @@ RUN cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Set the working directory to the isaac_ros-dev workspace
-WORKDIR /workspaces/isaac_ros-dev
+WORKDIR /workspaces/isaac_ros-dev/src
 
 # Copy files
-COPY . .
+COPY . pixelization_rs/
 
-RUN ls ../..
-RUN ls ..
-RUN ls .
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam
+RUN git clone https://github.com/IntelRealSense/realsense-ros
+RUN git clone https://github.com/ros2-rust/ros2_rust
 
 # Build the ROS workspace
 # RUN ls ..
