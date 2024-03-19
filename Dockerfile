@@ -24,7 +24,7 @@ WORKDIR /workspaces/isaac_ros-dev
 COPY ../.. .
 
 # Build the ROS workspace
-RUN colcon build --symlink-install
+RUN colcon build --symlink-install --packages-up-to pixelization_rs
 RUN echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 
 # TODO: Add the entrypoint
