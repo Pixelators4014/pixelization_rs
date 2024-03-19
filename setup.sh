@@ -7,7 +7,7 @@ sudo apt-get autoremove -y
 
 # Rust setup
 sudo apt install -y git libclang-dev python3-pip python3-vcstool # libclang-dev is required by bindgen
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 . "$HOME/.cargo/env"
 
 # Install these plugins for cargo and colcon:
