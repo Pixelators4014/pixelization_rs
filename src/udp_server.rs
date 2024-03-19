@@ -32,7 +32,15 @@ impl Response {
 pub(crate) struct Server {
     data: Arc<Mutex<Option<PathMsg>>>,
     socket: UdpSocket,
-    milli_start: u64, // TODO: Fix
+    milli_start: u32, // TODO: Fix
+}
+
+fn now_millis() -> u32 {
+    let time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap().as_millis();
+    let modded = time % 2.pow(31);
+    modded as u32
 }
 
 impl Server {
@@ -40,7 +48,7 @@ impl Server {
         Self {
             data,
             socket: UdpSocket::bind("127.0.0.1:8080").unwrap(),
-            milli_start: 0,
+            milli_start: now_millis(),
         }
     }
 
