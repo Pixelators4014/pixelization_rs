@@ -28,8 +28,8 @@ RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam
-# RUN git clone https://github.com/IntelRealSense/realsense-ros
 RUN git clone https://github.com/ros2-rust/ros2_rust
+RUN git clone https://github.com/IntelRealSense/realsense-ros
 COPY . pixelization_rs/
 
 WORKDIR /workspaces/isaac_ros-dev
