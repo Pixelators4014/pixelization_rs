@@ -2,7 +2,10 @@
 FROM nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_b7e1ed6c02a6fa3c1c7392479291c035
 
 # Run the required commands
-RUN apt update && apt install -y \
+RUN apt update \
+    && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
+    && sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u \
+    && apt install -y \
     ros-humble-isaac-ros-visual-slam \
     ros-humble-isaac-ros-yolov8 \
     ros-humble-isaac-ros-tensor-rt \
@@ -11,14 +14,11 @@ RUN apt update && apt install -y \
     ros-humble-isaac-ros-triton \
     ros-humble-isaac-ros-apriltag \
     libclang-dev python3-pip python3-vcstool \
-    && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
-    && sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u \
-    && sudo apt install -y librealsense2-utils librealsense2-dev \
+    librealsense2-utils librealsense2-dev \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
@@ -43,4 +43,4 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 
 # # TODO: Add the entrypoint
-CMD [ "ros2", "launch", "isaac_ros_visual_slam", "isaac_ros_visual_slam_realsense.launch.py" ]
+CMD [ "/bin/bash", "-c", "'ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py'" ]
