@@ -10,8 +10,11 @@ RUN apt update && apt install -y \
     ros-humble-isaac-ros-detectnet \
     ros-humble-isaac-ros-triton \
     ros-humble-isaac-ros-apriltag \
-    libclang-dev python3-pip python3-vcstool &&\
-    apt clean && rm -rf /var/lib/apt/lists/*
+    libclang-dev python3-pip python3-vcstool \
+    software-properties-common \
+    && add-apt-repository ppa:realsensecommunity/realsense \
+    && apt update && apt install -y librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg \
+    && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
