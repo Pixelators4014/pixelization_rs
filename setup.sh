@@ -14,7 +14,10 @@ pip install git+https://github.com/colcon/colcon-cargo.git
 pip install git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Colcon build + install
-colcon build --symlink-install
+colcon build --symlink-install --packages-up-to isaac_ros_common
+colcon build --symlink-install --packages-up-to pixelization_rs
+colcon build --symlink-install --packages-up-to isaac_ros_visual_slam
+colcon build --symlink-install --packages-up-to isaac_ros_visual_slam_interfaces
 source install/setup.bash
 
 # More rust setup
