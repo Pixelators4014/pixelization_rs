@@ -1,6 +1,11 @@
 # Use the specified Isaac ROS base image
 FROM nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_b7e1ed6c02a6fa3c1c7392479291c035
 
+# set user
+ARG USERNAME=admin
+ARG USER_UID=1000
+ARG USER_GID=1000
+
 # Run the required commands
 RUN apt update \
     && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
@@ -39,10 +44,6 @@ WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
 RUN /bin/bash -c 'vcs import src < src/ros2_rust/ros2_rust_humble.repos; source /opt/ros/humble/setup.bash; colcon build --symlink-install --packages-up-to pixelization_rs'
-
-ARG USERNAME=admin
-ARG USER_UID=1000
-ARG USER_GID=1000
 
 # # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", "source /opt/ros/humble/setup.bash && source /workspaces/isaac_ros-dev/install/setup.bash && ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py" ]
