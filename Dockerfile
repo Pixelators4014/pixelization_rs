@@ -24,12 +24,12 @@ RUN $HOME/.cargo/bin/cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Copy files
-RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common
-RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag
-RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection
-RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam
-RUN git clone https://github.com/ros2-rust/ros2_rust
-RUN git clone https://github.com/IntelRealSense/realsense-ros
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common --depth 1
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag --depth 1
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection --depth 1
+RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam --depth 1
+RUN git clone https://github.com/ros2-rust/ros2_rust --depth 1
+RUN git clone https://github.com/IntelRealSense/realsense-ros --depth 1
 COPY . pixelization_rs
 
 # Copy files
