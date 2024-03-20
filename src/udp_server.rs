@@ -1,6 +1,6 @@
-use std::io;
 use nav_msgs::msg::Path as PathMsg;
 use vision_msgs::msg::{Detection2DArray, Detection2D, ObjectHypothesisWithPose};
+use std::io;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 
@@ -39,8 +39,9 @@ pub(crate) struct Server {
 fn now_millis() -> u32 {
     let time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap().as_millis();
-    let modded = time % 2.pow(31);
+        .unwrap()
+        .as_millis();
+    let modded = time % 2_u128.pow(31);
     modded as u32
 }
 
@@ -72,8 +73,7 @@ impl Server {
                             angle_z: last.pose.orientation.z as f32,
                             angle_w: last.pose.orientation.w as f32,
                         };
-                        self.socket
-                            .send_to(&response.to_bytes(), return_addr)?;
+                        self.socket.send_to(&response.to_bytes(), return_addr)?;
                     } else {
                         self.socket
                             .send_to(&[255u8; 32], return_addr)?;
