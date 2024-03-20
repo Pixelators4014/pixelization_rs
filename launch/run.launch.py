@@ -81,7 +81,7 @@ def generate_launch_description():
         composable_node_descriptions=[
             visual_slam_node
         ],
-        output='both'
+        output='screen'
     )
 
     comms_node = Node(
