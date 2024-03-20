@@ -19,8 +19,7 @@ WORKDIR /workspaces/isaac_ros-dev/src
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH $HOME/.cargo/bin:$PATH
-RUN $HOME/.cargo/bin/cargo install cargo-ament-build
+RUN . ~/.cargo/env && cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Copy files
@@ -53,10 +52,10 @@ WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
 RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
-RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
-RUN source ~/.cargo/env && source /opt/ros/rolling/setup.bash && colcon build --symlink-install --packages-up-to pixelization_rs
-RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
+RUN . /opt/ros/humble/setup.bash && ~/.cargo/env && colcon build --symlink-install --packages-up-to pixelization_rs
 RUN echo 'source ~/.cargo/env' >> $HOME/.bashrc
+RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
+RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
 
 # # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", "ros2 launch pixelization_rs run.launch.py" ]
