@@ -56,7 +56,6 @@ RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
 RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
 RUN source ~/.cargo/env && source /opt/ros/rolling/setup.bash && colcon build --symlink-install --packages-up-to pixelization_rs
 RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
-RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
 RUN echo 'source ~/.cargo/env' >> $HOME/.bashrc
 
 # # TODO: Add the entrypoint
