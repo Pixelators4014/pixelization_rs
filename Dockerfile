@@ -16,7 +16,7 @@ RUN apt update \
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN echo 'source $HOME/.cargo/env' >> /root/.bashrc
+RUN echo 'source $HOME/.cargo/env' >> /etc/bash.bashrc
 RUN /bin/bash -c 'cargo install cargo-ament-build'
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
