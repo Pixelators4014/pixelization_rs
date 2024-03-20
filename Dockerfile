@@ -16,7 +16,8 @@ RUN apt update \
 
 # Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN /bin/bash -c 'source ~/.cargo/env; cargo install cargo-ament-build'
+RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
+RUN /bin/bash -c 'cargo install cargo-ament-build'
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Set the working directory to the isaac_ros-dev workspace
@@ -51,7 +52,10 @@ COPY /usr/share/vpi2 /usr/share/vpi2
 WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
-RUN /bin/bash -c 'vcs import src < src/ros2_rust/ros2_rust_humble.repos; source /opt/ros/humble/setup.bash; source ~/.cargo/env; colcon build --symlink-install --packages-up-to pixelization_rs'
+RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
+RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
+RUN /bin/bash -c 'colcon build --symlink-install --packages-up-to pixelization_rs'
+RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
 
 # # TODO: Add the entrypoint
-CMD [ "/bin/bash", "-c", "source ~/.cargo/env; source /opt/ros/humble/setup.bash && source /workspaces/isaac_ros-dev/install/setup.bash && ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py" ]
+CMD [ "/bin/bash", "-c", "ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py" ]
