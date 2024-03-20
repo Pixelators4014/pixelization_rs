@@ -36,10 +36,23 @@ impl NetworkNode {
 fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
-    let data = Arc::clone(&network_node.data);
+    let server_data = Arc::clone(&network_node.data);
+    let ping_data = Arc::clone(&network_node.data);
+
     std::thread::spawn(move || {
-        let mut server = udp_server::Server::new(data);
+        let mut server = udp_server::Server::new(server_data);
         server.run().unwrap();
     });
+    std::thread::spawn(move || {
+        loop {
+            let data = ping_data.lock().unwrap();
+            if data.is_some() {
+                println!("Node is Alive and Running");
+            } else {
+                println!("Node is Alive with No data");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(1000));
+        }
+    })
     rclrs::spin(Arc::clone(&network_node.node))
 }
