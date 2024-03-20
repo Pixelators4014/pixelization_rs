@@ -58,4 +58,4 @@ RUN source ~/.cargo/env && colcon build --symlink-install --packages-up-to pixel
 RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
 
 # # TODO: Add the entrypoint
-CMD [ "/bin/bash", "-c", "ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py" ]
+CMD [ "/bin/bash", "-c", "ros2 launch pixelization_rs run.launch.py" ]
