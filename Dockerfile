@@ -21,7 +21,7 @@ WORKDIR /workspaces/isaac_ros-dev/src
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN echo 'source $HOME/.cargo/env' >> .bashrc
 ENV PATH $HOME/.cargo/bin:$PATH
-RUN /bin/bash -c 'cargo install cargo-ament-build'
+RUN cargo install cargo-ament-build
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
 # Copy files
@@ -55,7 +55,7 @@ WORKDIR /workspaces/isaac_ros-dev
 # Build the ROS workspace
 RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
 RUN echo 'source /opt/ros/humble/setup.bash' >> $HOME/.bashrc
-RUN /bin/bash -c 'colcon build --symlink-install --packages-up-to pixelization_rs'
+RUN colcon build --symlink-install --packages-up-to pixelization_rs
 RUN echo 'source /workspaces/isaac_ros-dev/install/setup.bash' >> $HOME/.bashrc
 
 # # TODO: Add the entrypoint
