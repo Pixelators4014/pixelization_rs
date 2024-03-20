@@ -1,6 +1,8 @@
 # Use the specified Isaac ROS base image
 FROM isaac_ros_dev-aarch64
 
+USER admin
+
 # Run the required commands
 RUN apt update \
     && apt install -y \
@@ -53,9 +55,9 @@ WORKDIR /workspaces/isaac_ros-dev
 # Build the ROS workspace
 RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
 RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-install --packages-up-to pixelization_rs
-RUN echo '. ~/.cargo/env' >> /home/admin/.bashrc
-RUN echo '. /opt/ros/humble/setup.bash' >> /home/admin/.bashrc
-RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> /home/admin/.bashrc
+RUN echo '. ~/.cargo/env' >> ~/.bashrc
+RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
+RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
 
 # # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", "ros2 launch pixelization_rs run.launch.py" ]
