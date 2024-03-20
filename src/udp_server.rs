@@ -1,5 +1,4 @@
 use nav_msgs::msg::Path as PathMsg;
-use vision_msgs::msg::{Detection2DArray, Detection2D, ObjectHypothesisWithPose};
 use std::io;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
