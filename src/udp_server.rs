@@ -1,4 +1,5 @@
 use nav_msgs::msg::Path as PathMsg;
+use vision_msgs::msg::{Detection2DArray, Detection2D, ObjectHypothesisWithPose};
 use std::io;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
@@ -74,10 +75,12 @@ impl Server {
                         };
                         self.socket.send_to(&response.to_bytes(), return_addr)?;
                     } else {
-                        self.socket.send_to(&[1u8; 32], return_addr)?;
+                        self.socket
+                            .send_to(&[255u8; 32], return_addr)?;
                     }
                 } else {
-                    self.socket.send_to(&[2u8; 32], return_addr)?;
+                    self.socket
+                        .send_to(&[254u8; 32], return_addr)?;
                 }
             }
         }

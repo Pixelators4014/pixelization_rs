@@ -24,5 +24,11 @@ version = "*"
 [dependencies.nav_msgs]
 version = "*"
 
-#[package.metadata.ros]
-#install_to_share = ["launch"]
+[dependencies.geometry_msgs]
+version = "*"
+
+[dependencies.vision_msgs]
+version = "*"
+
+[package.metadata.ros]
+install_to_share = ["launch"]
