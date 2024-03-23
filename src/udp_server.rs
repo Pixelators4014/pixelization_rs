@@ -125,13 +125,13 @@ impl Server {
         }
     }
 
-    async fn process_request(self: Arc<Self>, request: Request) -> Response {
+    async fn process_request(data: Arc<Mutex<Option<PathMsg>>>, milli_start: u32, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = self.data.lock().unwrap().as_ref() {
+                if let Some(msg) = data.lock().unwrap().as_ref() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
-                        let header = (now - self.milli_start) as u32; // TODO: rework into return system
+                        let header = (now - milli_start) as u32; // TODO: rework into return system
                         let response = Pose {
                             x: last.pose.position.x as f32,
                             y: last.pose.position.y as f32,
@@ -160,16 +160,16 @@ impl Server {
         }
     }
 
-    pub async fn handle_bytes(self: Arc<Self>, bytes: &Vec<u8>) -> Vec<u8> {
+    pub async fn handle_bytes(data: Arc<Mutex<Option<PathMsg>>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         if let Some(request) = request {
-            self.process_request(request).await.to_bytes()
+            Self::process_request(data, milli_start, request).await.to_bytes()
         } else {
             Response::Error("Invalid Request (first byte not valid)".to_string()).to_bytes()
         }
     }
 
-    pub async fn run(self: Arc<Self>) -> io::Result<()> {
+    pub async fn run(&self) -> io::Result<()> {
         println!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);
         let task_socket = Arc::clone(&self.socket);
@@ -185,7 +185,7 @@ impl Server {
 
                     let shared_tx = tx.clone();
                     tokio::spawn(async move {
-                        let new_bytes = self.handle_bytes(&packet.buf).await;
+                        let new_bytes = Self::handle_bytes(Arc::clone(&self.data), self.milli_start, &packet.buf).await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes
