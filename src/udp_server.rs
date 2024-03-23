@@ -172,10 +172,11 @@ impl Server {
     pub async fn run(self: Arc<Self>) -> io::Result<()> {
         println!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);
+        let task_socket = Arc::clone(&self.socket);
         tokio::spawn(async move {
             loop {
                 let mut buffer = [0u8; 512];
-                let result = Arc::clone(&self.socket).recv_from(&mut buffer).await;
+                let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
                 if let Ok((_, src)) = result {
                     let packet = Packet {
                         buf: buffer.to_vec(),
