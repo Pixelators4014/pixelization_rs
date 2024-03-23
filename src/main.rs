@@ -40,7 +40,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let server_data = Arc::clone(&network_node.data);
     let ping_data = Arc::clone(&network_node.data);
 
-    std::thread::spawn(move || {
+    tokio::task::spawn(move || {
         let mut server = udp_server::Server::new(server_data);
         server.run().unwrap();
     });
