@@ -43,15 +43,19 @@ impl Pose {
 enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
+    GetDetections
 }
 
 impl Request {
     fn from_bytes(bytes: &[u8]) -> Option<Self> {
         if bytes[0] == 0 {
-            Self::GetVslamPose
+            Some(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            Self::SetVslamPose(Pose::from_bytes(bytes[1..]))
+            Some(Self::SetVslamPose(Pose::from_bytes(bytes[1..])))
+        } else if bytes[0] == 2 {
+            Some(Self::GetDetections)
         }
+        None
     }
 }
 
@@ -129,13 +133,17 @@ impl Server {
                         };
                         response.into()
                     } else {
-                        Response::Error("No VSLAM data".to_string())
+                        Response::Error("Server Error:No VSLAM data, please wait or check logs".to_string())
                     }
                 } else {
-                    Response::Error("Poisoned Node Mutex".to_string())
+                    Response::Error("Server Error: Poisoned Node Mutex".to_string())
                 }
             }
             Request::SetVslamPose(pose) => {
+                // TODO: Fix
+                Response::Success
+            }
+            Request::GetDetections => {
                 // TODO: Fix
                 Response::Success
             }
@@ -154,7 +162,7 @@ impl Server {
                 if let Some(request) = parsed_request {
                     let response = self.process_request(request);
                 } else {
-                    let response = Response::Error("Invalid Request".to_string());
+                    let response = Response::Error("Invalid Request (first byte not valid)".to_string());
                 }
                 let bytes = response.to_bytes();
                 self.socket.send_to(&bytes, return_addr)?;
