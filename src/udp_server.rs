@@ -3,29 +3,86 @@ use std::io;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 
-struct Response {
-    header: u32,
+#[derive(Copy, Clone, Debug)]
+struct Pose {
     x: f32,
     y: f32,
     z: f32,
+    angle_w: f32,
     angle_x: f32,
     angle_y: f32,
     angle_z: f32,
-    angle_w: f32,
 }
 
-impl Response {
-    fn to_bytes(&self) -> [u8; 32] {
+impl Pose {
+    fn from_bytes(bytes: &[u8]) -> Self {
+        Self {
+            x: f32::from_le_bytes(bytes[0..4].try_into().unwrap()),
+            y: f32::from_le_bytes(bytes[4..8].try_into().unwrap()),
+            z: f32::from_le_bytes(bytes[8..12].try_into().unwrap()),
+            angle_w: f32::from_le_bytes(bytes[12..16].try_into().unwrap()),
+            angle_x: f32::from_le_bytes(bytes[16..20].try_into().unwrap()),
+            angle_y: f32::from_le_bytes(bytes[20..24].try_into().unwrap()),
+            angle_z: f32::from_le_bytes(bytes[24..28].try_into().unwrap()),
+        }
+    }
+
+    fn to_bytes(&self) -> [u8; 28] {
         let mut bytes = [0u8; 32];
-        bytes[0..4].copy_from_slice(&self.header.to_le_bytes());
-        bytes[4..8].copy_from_slice(&self.x.to_le_bytes());
-        bytes[8..12].copy_from_slice(&self.y.to_le_bytes());
-        bytes[12..16].copy_from_slice(&self.z.to_le_bytes());
+        bytes[0..4].copy_from_slice(&self.x.to_le_bytes());
+        bytes[4..8].copy_from_slice(&self.y.to_le_bytes());
+        bytes[8..12].copy_from_slice(&self.z.to_le_bytes());
+        bytes[12..16].copy_from_slice(&self.angle_w.to_le_bytes());
         bytes[16..20].copy_from_slice(&self.angle_x.to_le_bytes());
         bytes[20..24].copy_from_slice(&self.angle_y.to_le_bytes());
         bytes[24..28].copy_from_slice(&self.angle_z.to_le_bytes());
-        bytes[28..32].copy_from_slice(&self.angle_w.to_le_bytes());
         bytes
+    }
+}
+
+enum Request {
+    GetVslamPose,
+    SetVslamPose(Pose),
+}
+
+impl Request {
+    fn from_bytes(bytes: &[u8]) -> Option<Self> {
+        if bytes[0] == 0 {
+            Self::GetVslamPose
+        } else if bytes[0] == 1 {
+            Self::SetVslamPose(Pose::from_bytes(bytes[1..]))
+        }
+    }
+}
+
+enum Response {
+    Pose(Pose),
+    Success,
+    Error(String)
+}
+
+impl Response {
+    fn to_bytes(&self) -> Vec<u8> {
+        match self {
+            Self::Success => {
+                let mut bytes = [0u8];
+            }
+            Self::Error(msg) => {
+                let mut bytes = [0u8; 512];
+                bytes[0] = 1;
+                bytes[1..].copy_from_slice(msg.as_bytes());
+            }
+            Self::Pose(pose) => {
+                let mut bytes = [0u8; 28];
+                bytes[0..28].copy_from_slice(&pose.to_bytes());
+            }
+        }
+    }
+}
+
+impl From<Pose> for Response {
+    fn from(pose: Pose) -> Self {
+        Self::Pose(pose)
     }
 }
 
@@ -53,40 +110,53 @@ impl Server {
         }
     }
 
+    pub fn process_request(&mut self, request: Request) -> Response {
+        return match request {
+            Request::GetVslamPose => {
+                if let Some(msg) = self.data.lock().unwrap().as_ref() {
+                    if let Some(last) = msg.poses.last() {
+                        let now = now_millis_u31();
+                        let header = (now - self.milli_start) as u32; // TODO: rework into return system
+                        let response = Pose {
+                            x: last.pose.position.x as f32,
+                            y: last.pose.position.y as f32,
+                            z: last.pose.position.z as f32,
+                            angle_w: last.pose.orientation.w as f32,
+                            angle_x: last.pose.orientation.x as f32,
+                            angle_y: last.pose.orientation.y as f32,
+                            angle_z: last.pose.orientation.z as f32,
+                        };
+                        response.into()
+                    } else {
+                        Response::Error("No VSLAM data".to_string())
+                    }
+                } else {
+                    Response::Error("Poisoned Node Mutex".to_string())
+                }
+            }
+            Request::SetVslamPose(pose) => {
+                // TODO: Fix
+                Response::Success
+            }
+        }
+    }
+
     pub fn run(&mut self) -> io::Result<()> {
         println!("Listening on {}", self.socket.local_addr()?);
         loop {
-            let mut buf = [0u8; 32];
+            let mut buf = [0u8; 512];
             if let Ok(req) = self.socket.recv_from(buf.as_mut()) {
                 let (size, return_addr) = req;
                 println!("Request from {}", return_addr);
                 let bytes = &buf[0..size];
-                if bytes[0] == 0 {
-                    if let Some(msg) = self.data.lock().unwrap().as_ref() {
-                        if let Some(last) = msg.poses.last() {
-                            let now = now_millis_u31();
-                            let header = (now - self.milli_start) as u32;
-                            let response = Response {
-                                header,
-                                x: last.pose.position.x as f32,
-                                y: last.pose.position.y as f32,
-                                z: last.pose.position.z as f32,
-                                angle_x: last.pose.orientation.x as f32,
-                                angle_y: last.pose.orientation.y as f32,
-                                angle_z: last.pose.orientation.z as f32,
-                                angle_w: last.pose.orientation.w as f32,
-                            };
-                            let _ = self.socket.send_to(&response.to_bytes(), return_addr);
-                        } else {
-                            let _ = self.socket
-                                .send_to(&[255u8; 32], return_addr);
-                        }
-                    } else {
-                        let _ = self.socket
-                            .send_to(&[254u8; 32], return_addr);
-                    }
-                } else if bytes[0] == 255 { // Position set request
+                let parsed_request = Request::from_bytes(bytes);
+                if let Some(request) = parsed_request {
+                    let response = self.process_request(request);
+                } else {
+                    let response = Response::Error("Invalid Request".to_string());
                 }
+                let bytes = response.to_bytes();
+                self.socket.send_to(&bytes, return_addr)?;
             }
         }
     }
