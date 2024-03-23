@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use nav_msgs::msg::Path as PathMsg;
 
 mod udp_server;
@@ -47,7 +46,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     });
     tokio::task::spawn(async move {
         loop {
-            let data = ping_data.lock().await;
+            let data = ping_data.lock().unwrap();
             if data.is_some() {
                 println!("Node is Alive and Running");
             } else {

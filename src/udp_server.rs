@@ -1,6 +1,6 @@
 use nav_msgs::msg::Path as PathMsg;
 use std::io;
-use std::net::UdpSocket;
+use tokio::net::UdpSocket;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -123,7 +123,7 @@ impl Server {
     async fn process_request(&mut self, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = self.data.lock().await.as_ref() {
+                if let Some(msg) = self.data.lock() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - self.milli_start) as u32; // TODO: rework into return system
