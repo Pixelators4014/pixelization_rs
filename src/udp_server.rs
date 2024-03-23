@@ -40,7 +40,7 @@ impl Pose {
     }
 }
 
-pub enum Request {
+enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
     GetDetections
@@ -60,7 +60,7 @@ impl Request {
     }
 }
 
-pub enum Response {
+enum Response {
     Pose(Pose),
     Success,
     Error(String)
@@ -119,7 +119,7 @@ impl Server {
         }
     }
 
-    pub fn process_request(&mut self, request: Request) -> Response {
+    fn process_request(&mut self, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = self.data.lock().unwrap().as_ref() {
