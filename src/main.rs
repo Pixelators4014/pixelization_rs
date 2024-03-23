@@ -7,6 +7,7 @@ struct NetworkNode {
     node: Arc<rclrs::Node>,
     #[allow(dead_code)]
     subscription: Arc<rclrs::Subscription<PathMsg>>,
+    client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     data: Arc<Mutex<Option<PathMsg>>>,
 }
 
@@ -25,9 +26,15 @@ impl NetworkNode {
                     *data_cb.lock().unwrap() = Some(msg);
                 },
             )?;
+        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>("visual_slam/set_odometry_pose")?;
+        while !client.service_is_ready()? {
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            println!("Waiting for service to initialize ...");
+        }
         Ok(Self {
             node,
             subscription,
+            client,
             data,
         })
     }
