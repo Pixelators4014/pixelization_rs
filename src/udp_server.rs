@@ -1,6 +1,7 @@
 use nav_msgs::msg::Path as PathMsg;
 use std::io;
 use tokio::net::UdpSocket;
+use tokio::sync::mpsc;
 use std::sync::{Arc, Mutex};
 
 #[derive(Copy, Clone, Debug)]
@@ -95,12 +96,6 @@ impl From<Pose> for Response {
     }
 }
 
-pub struct Server {
-    data: Arc<Mutex<Option<PathMsg>>>,
-    socket: UdpSocket,
-    milli_start: u32, // TODO: Fix
-}
-
 fn now_millis_u31() -> u32 {
     let time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -110,16 +105,27 @@ fn now_millis_u31() -> u32 {
     modded as u32
 }
 
+struct Packet {
+    buf: Vec<u8>,
+    addr: std::net::SocketAddr,
+}
+
+pub struct Server {
+    data: Arc<Mutex<Option<PathMsg>>>,
+    socket: Arc<UdpSocket>,
+    milli_start: u32, // TODO: Fix
+}
+
 impl Server {
     pub async fn new(data: Arc<Mutex<Option<PathMsg>>>) -> Self {
         Self {
             data,
-            socket: UdpSocket::bind("127.0.0.1:8080").await.unwrap(),
+            socket: Arc::new(UdpSocket::bind("127.0.0.1:8080").await.unwrap()),
             milli_start: now_millis_u31(),
         }
     }
 
-    async fn process_request(&mut self, request: Request) -> Response {
+    async fn process_request(self: Arc<Self>, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = self.data.lock().unwrap().as_ref() {
@@ -154,23 +160,44 @@ impl Server {
         }
     }
 
-    pub async fn run(&mut self) -> io::Result<()> {
+    pub async fn handle_bytes(self: Arc<Self>, bytes: Vec<u8>) -> Response {
+        let request = Request::from_bytes(&bytes);
+        if let Some(request) = request {
+            self.process_request(request).await
+        } else {
+            Response::Error("Invalid Request (first byte not valid)".to_string())
+        }
+    }
+
+    pub async fn run(self: Arc<Self>) -> io::Result<()> {
         println!("Listening on {}", self.socket.local_addr()?);
-        loop {
-            let mut buf = [0u8; 512];
-            if let Ok(req) = self.socket.recv_from(buf.as_mut()).await {
-                let (size, return_addr) = req;
-                println!("Request from {}", return_addr);
-                let bytes = &buf[0..size];
-                let parsed_request = Request::from_bytes(bytes);
-                let response = if let Some(request) = parsed_request {
-                    self.process_request(request).await
-                } else {
-                    Response::Error("Invalid Request (first byte not valid)".to_string())
-                };
-                let bytes = response.to_bytes();
-                self.socket.send_to(&bytes, return_addr).await?;
+        let (tx, mut rx) = mpsc::channel(128);
+        tokio::spawn(async move {
+            loop {
+                let mut buffer = [0u8; 512];
+                let result = Arc::clone(&self.socket).recv_from(&mut buffer).await;
+                if let Ok((_, src)) = result {
+                    let packet = Packet {
+                        buf: buffer.to_vec(),
+                        addr: src,
+                    };
+
+                    let shared_tx = tx.clone();
+                    tokio::spawn(async move {
+                        let new_bytes = self.handle_bytes(&packet.buf).await;
+                        let packet = Packet {
+                            addr: packet.addr,
+                            buf: new_bytes
+                        };
+                        shared_tx.send(packet).await.unwrap(); // Send them to queue back to clients
+                    });
+                }
             }
+        });
+
+        while let Some(packet) = rx.recv().await {
+            // transfer response packet to the client.
+            let _ = Arc::clone(&arc_sock).send_to(&packet.buf, &packet.addr).await;
         }
     }
 }
