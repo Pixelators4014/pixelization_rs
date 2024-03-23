@@ -42,7 +42,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
 
     tokio::task::spawn(async move {
         let mut server = udp_server::Server::new(server_data).await;
-        Arc::new(server).run().await.unwrap();
+        server.run().await.unwrap();
     });
     tokio::task::spawn(async move {
         loop {
