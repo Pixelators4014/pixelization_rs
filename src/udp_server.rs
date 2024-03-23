@@ -160,8 +160,8 @@ impl Server {
         }
     }
 
-    pub async fn handle_bytes(self: Arc<Self>, bytes: Vec<u8>) -> Response {
-        let request = Request::from_bytes(&bytes);
+    pub async fn handle_bytes(self: Arc<Self>, bytes: &Vec<u8>) -> Response {
+        let request = Request::from_bytes(bytes);
         if let Some(request) = request {
             self.process_request(request).await
         } else {
@@ -197,7 +197,7 @@ impl Server {
 
         while let Some(packet) = rx.recv().await {
             // transfer response packet to the client.
-            let _ = Arc::clone(&arc_sock).send_to(&packet.buf, &packet.addr).await;
+            let _ = Arc::clone(&self.socket).send_to(&packet.buf, &packet.addr).await;
         }
     }
 }
