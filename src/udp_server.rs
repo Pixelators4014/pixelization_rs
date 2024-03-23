@@ -28,7 +28,7 @@ impl Pose {
     }
 
     fn to_bytes(&self) -> [u8; 28] {
-        let mut bytes = [0u8; 32];
+        let mut bytes = [0u8; 28];
         bytes[0..4].copy_from_slice(&self.x.to_le_bytes());
         bytes[4..8].copy_from_slice(&self.y.to_le_bytes());
         bytes[8..12].copy_from_slice(&self.z.to_le_bytes());
