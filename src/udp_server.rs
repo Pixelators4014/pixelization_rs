@@ -186,8 +186,9 @@ impl Server {
                     };
 
                     let shared_tx = tx.clone();
+                    let inner_data = Arc::clone(&task_data);
                     tokio::spawn(async move {
-                        let new_bytes = Self::handle_bytes(Arc::clone(&task_data), task_milli_start, &packet.buf).await;
+                        let new_bytes = Self::handle_bytes(Arc::clone(&inner_data), task_milli_start, &packet.buf).await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes
