@@ -74,7 +74,8 @@ impl Response {
             }
             Self::Pose(pose) => {
                 let mut bytes = [0u8; 28];
-                bytes[0..28].copy_from_slice(&pose.to_bytes());
+                bytes[0] = 255;
+                bytes[1..29].copy_from_slice(&pose.to_bytes());
             }
         }
     }
