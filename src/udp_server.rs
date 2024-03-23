@@ -71,16 +71,19 @@ impl Response {
         match self {
             Self::Success => {
                 let mut bytes = [0u8];
+                return bytes.to_vec();
             }
             Self::Error(msg) => {
                 let mut bytes = [0u8; 512];
                 bytes[0] = 1;
                 bytes[1..].copy_from_slice(msg.as_bytes());
+                return bytes.to_vec();
             }
             Self::Pose(pose) => {
                 let mut bytes = [0u8; 28];
                 bytes[0] = 255;
                 bytes[1..29].copy_from_slice(&pose.to_bytes());
+                return bytes.to_vec();
             }
         }
     }
