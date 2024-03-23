@@ -34,7 +34,7 @@ impl NetworkNode {
 }
 
 #[tokio::main]
-fn main() -> Result<(), rclrs::RclrsError> {
+async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
     let server_data = Arc::clone(&network_node.data);

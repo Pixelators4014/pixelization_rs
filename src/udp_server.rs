@@ -159,11 +159,11 @@ impl Server {
                 println!("Request from {}", return_addr);
                 let bytes = &buf[0..size];
                 let parsed_request = Request::from_bytes(bytes);
-                if let Some(request) = parsed_request {
-                    let response = self.process_request(request);
+                let response = if let Some(request) = parsed_request {
+                    self.process_request(request)
                 } else {
-                    let response = Response::Error("Invalid Request (first byte not valid)".to_string());
-                }
+                    Response::Error("Invalid Request (first byte not valid)".to_string())
+                };
                 let bytes = response.to_bytes();
                 self.socket.send_to(&bytes, return_addr)?;
             }
