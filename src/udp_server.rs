@@ -4,7 +4,7 @@ use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 
 #[derive(Copy, Clone, Debug)]
-struct Pose {
+pub struct Pose {
     x: f32,
     y: f32,
     z: f32,
@@ -40,7 +40,7 @@ impl Pose {
     }
 }
 
-enum Request {
+pub enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
     GetDetections
@@ -60,7 +60,7 @@ impl Request {
     }
 }
 
-enum Response {
+pub enum Response {
     Pose(Pose),
     Success,
     Error(String)
@@ -95,7 +95,7 @@ impl From<Pose> for Response {
     }
 }
 
-pub(crate) struct Server {
+pub struct Server {
     data: Arc<Mutex<Option<PathMsg>>>,
     socket: UdpSocket,
     milli_start: u32, // TODO: Fix
