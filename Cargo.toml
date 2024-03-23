@@ -27,5 +27,8 @@ version = "*"
 [dependencies.geometry_msgs]
 version = "*"
 
+[dependencies.isaac_ros_visual_slam_interfaces]
+version = "*"
+
 [package.metadata.ros]
 install_to_share = ["launch"]
