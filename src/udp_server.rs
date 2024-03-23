@@ -1,8 +1,7 @@
 use nav_msgs::msg::Path as PathMsg;
 use std::io;
 use tokio::net::UdpSocket;
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Pose {

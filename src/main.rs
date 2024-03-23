@@ -22,7 +22,7 @@ impl NetworkNode {
                 rclrs::QOS_PROFILE_DEFAULT,
                 move |msg: PathMsg| {
                     // This subscription now owns the data_cb variable
-                    *data_cb.blocking_lock() = Some(msg);
+                    *data_cb.lock().unwrap() = Some(msg);
                 },
             )?;
         Ok(Self {
