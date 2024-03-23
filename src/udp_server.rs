@@ -1,7 +1,8 @@
 use nav_msgs::msg::Path as PathMsg;
 use std::io;
 use std::net::UdpSocket;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Pose {
@@ -119,10 +120,10 @@ impl Server {
         }
     }
 
-    fn process_request(&mut self, request: Request) -> Response {
+    async fn process_request(&mut self, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = self.data.lock().unwrap().as_ref() {
+                if let Some(msg) = self.data.lock().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - self.milli_start) as u32; // TODO: rework into return system
@@ -154,7 +155,7 @@ impl Server {
         }
     }
 
-    pub fn run(&mut self) -> io::Result<()> {
+    pub async fn run(&mut self) -> io::Result<()> {
         println!("Listening on {}", self.socket.local_addr()?);
         loop {
             let mut buf = [0u8; 512];
@@ -164,7 +165,7 @@ impl Server {
                 let bytes = &buf[0..size];
                 let parsed_request = Request::from_bytes(bytes);
                 let response = if let Some(request) = parsed_request {
-                    self.process_request(request)
+                    self.process_request(request).await
                 } else {
                     Response::Error("Invalid Request (first byte not valid)".to_string())
                 };
