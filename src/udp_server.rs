@@ -199,5 +199,6 @@ impl Server {
             // transfer response packet to the client.
             let _ = Arc::clone(&self.socket).send_to(&packet.buf, &packet.addr).await;
         }
+        Ok(())
     }
 }
