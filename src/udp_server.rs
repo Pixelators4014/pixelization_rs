@@ -173,6 +173,8 @@ impl Server {
         println!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);
         let task_socket = Arc::clone(&self.socket);
+        let task_data = Arc::clone(&self.data);
+        let task_milli_start = self.milli_start;
         tokio::spawn(async move {
             loop {
                 let mut buffer = [0u8; 512];
@@ -185,7 +187,7 @@ impl Server {
 
                     let shared_tx = tx.clone();
                     tokio::spawn(async move {
-                        let new_bytes = Self::handle_bytes(Arc::clone(&self.data), self.milli_start, &packet.buf).await;
+                        let new_bytes = Self::handle_bytes(Arc::clone(&task_data), milli_start, &packet.buf).await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes
