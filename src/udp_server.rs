@@ -111,7 +111,7 @@ fn now_millis_u31() -> u32 {
 }
 
 impl Server {
-    pub fn new(data: Arc<Mutex<Option<PathMsg>>>) -> Self {
+    pub async fn new(data: Arc<Mutex<Option<PathMsg>>>) -> Self {
         Self {
             data,
             socket: UdpSocket::bind("127.0.0.1:8080").await.unwrap(),

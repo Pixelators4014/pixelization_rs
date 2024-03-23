@@ -41,7 +41,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let ping_data = Arc::clone(&network_node.data);
 
     tokio::task::spawn(async move {
-        let mut server = udp_server::Server::new(server_data);
+        let mut server = udp_server::Server::new(server_data).await;
         server.run().await.unwrap();
     });
     tokio::task::spawn(async move {
