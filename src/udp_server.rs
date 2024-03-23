@@ -58,30 +58,34 @@ impl Server {
         loop {
             let mut buf = [0u8; 32];
             if let Ok(req) = self.socket.recv_from(buf.as_mut()) {
-                let (_size, return_addr) = req;
+                let (size, return_addr) = req;
                 println!("Request from {}", return_addr);
-                if let Some(msg) = self.data.lock().unwrap().as_ref() {
-                    if let Some(last) = msg.poses.last() {
-                        let now = now_millis_u31();
-                        let header = (now - self.milli_start) as u32;
-                        let response = Response {
-                            header,
-                            x: last.pose.position.x as f32,
-                            y: last.pose.position.y as f32,
-                            z: last.pose.position.z as f32,
-                            angle_x: last.pose.orientation.x as f32,
-                            angle_y: last.pose.orientation.y as f32,
-                            angle_z: last.pose.orientation.z as f32,
-                            angle_w: last.pose.orientation.w as f32,
-                        };
-                        let _ = self.socket.send_to(&response.to_bytes(), return_addr);
+                let bytes = &buf[0..size];
+                if bytes[0] == 0 {
+                    if let Some(msg) = self.data.lock().unwrap().as_ref() {
+                        if let Some(last) = msg.poses.last() {
+                            let now = now_millis_u31();
+                            let header = (now - self.milli_start) as u32;
+                            let response = Response {
+                                header,
+                                x: last.pose.position.x as f32,
+                                y: last.pose.position.y as f32,
+                                z: last.pose.position.z as f32,
+                                angle_x: last.pose.orientation.x as f32,
+                                angle_y: last.pose.orientation.y as f32,
+                                angle_z: last.pose.orientation.z as f32,
+                                angle_w: last.pose.orientation.w as f32,
+                            };
+                            let _ = self.socket.send_to(&response.to_bytes(), return_addr);
+                        } else {
+                            let _ = self.socket
+                                .send_to(&[255u8; 32], return_addr);
+                        }
                     } else {
                         let _ = self.socket
-                            .send_to(&[255u8; 32], return_addr);
+                            .send_to(&[254u8; 32], return_addr);
                     }
-                } else {
-                    let _ = self.socket
-                        .send_to(&[254u8; 32], return_addr);
+                } else if bytes[0] == 255 { // Position set request
                 }
             }
         }
