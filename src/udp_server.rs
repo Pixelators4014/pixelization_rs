@@ -114,7 +114,7 @@ impl Server {
     pub fn new(data: Arc<Mutex<Option<PathMsg>>>) -> Self {
         Self {
             data,
-            socket: UdpSocket::bind("127.0.0.1:8080").unwrap(),
+            socket: UdpSocket::bind("127.0.0.1:8080").await.unwrap(),
             milli_start: now_millis_u31(),
         }
     }
@@ -158,7 +158,7 @@ impl Server {
         println!("Listening on {}", self.socket.local_addr()?);
         loop {
             let mut buf = [0u8; 512];
-            if let Ok(req) = self.socket.recv_from(buf.as_mut()) {
+            if let Ok(req) = self.socket.recv_from(buf.as_mut()).await {
                 let (size, return_addr) = req;
                 println!("Request from {}", return_addr);
                 let bytes = &buf[0..size];
@@ -169,7 +169,7 @@ impl Server {
                     Response::Error("Invalid Request (first byte not valid)".to_string())
                 };
                 let bytes = response.to_bytes();
-                self.socket.send_to(&bytes, return_addr)?;
+                self.socket.send_to(&bytes, return_addr).await?;
             }
         }
     }
