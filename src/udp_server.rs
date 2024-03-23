@@ -122,7 +122,7 @@ impl Server {
     async fn process_request(&mut self, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = self.data.lock() {
+                if let Some(msg) = self.data.lock().unwrap() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - self.milli_start) as u32; // TODO: rework into return system
@@ -140,7 +140,7 @@ impl Server {
                         Response::Error("Server Error:No VSLAM data, please wait or check logs".to_string())
                     }
                 } else {
-                    Response::Error("Server Error: Poisoned Node Mutex".to_string())
+                    Response::Error("No VSLAM data".to_string())
                 }
             }
             Request::SetVslamPose(pose) => {
