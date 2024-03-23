@@ -48,14 +48,15 @@ enum Request {
 
 impl Request {
     fn from_bytes(bytes: &[u8]) -> Option<Self> {
-        if bytes[0] == 0 {
+        return if bytes[0] == 0 {
             Some(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            Some(Self::SetVslamPose(Pose::from_bytes(bytes[1..])))
+            Some(Self::SetVslamPose(Pose::from_bytes(&bytes[1..])))
         } else if bytes[0] == 2 {
             Some(Self::GetDetections)
-        }
-        None
+        } else {
+            None
+        };
     }
 }
 
