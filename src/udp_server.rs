@@ -163,9 +163,9 @@ impl Server {
     pub async fn handle_bytes(self: Arc<Self>, bytes: &Vec<u8>) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         if let Some(request) = request {
-            self.process_request(request).await.into()
+            self.process_request(request).await.to_bytes()
         } else {
-            Response::Error("Invalid Request (first byte not valid)".to_string()).into()
+            Response::Error("Invalid Request (first byte not valid)".to_string()).to_bytes()
         }
     }
 
