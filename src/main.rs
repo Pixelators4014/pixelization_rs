@@ -14,15 +14,15 @@ struct NetworkNode {
     #[allow(dead_code)]
     april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
-    path_data: Arc<Mutex<Option<PathMsg>>>,
+    path: Arc<Mutex<Option<PathMsg>>>,
     april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>,
 }
 
 impl NetworkNode {
     fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
-        let path_data = Arc::new(Mutex::new(None));
-        let path_data_cb = Arc::clone(&path_data);
+        let path = Arc::new(Mutex::new(None));
+        let path_cb = Arc::clone(&path);
         let path_subscription =
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
@@ -30,7 +30,7 @@ impl NetworkNode {
                 rclrs::QOS_PROFILE_DEFAULT,
                 move |msg: PathMsg| {
                     // This subscription now owns the data_cb variable
-                    *path_data_cb.lock().unwrap() = Some(msg);
+                    *path_cb.lock().unwrap() = Some(msg);
                 },
             )?;
         let april_tags = Arc::new(Mutex::new(None));
@@ -54,7 +54,7 @@ impl NetworkNode {
             path_subscription,
             april_tags_subscription,
             client,
-            path_data,
+            path,
             april_tags
         })
     }
@@ -64,12 +64,15 @@ impl NetworkNode {
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
-    let server_data = Arc::clone(&network_node.path_data);
+    let server_path = Arc::clone(&network_node.path);
     let server_client = Arc::clone(&network_node.client);
-    let ping_data = Arc::clone(&network_node.path_data);
+    let ping_data = Arc::clone(&network_node.path);
+    let localizer_path = Arc::clone(&network_node.path);
+    let localizer_client = Arc::clone(&network_node.client);
+    let localizer_april_tags = Arc::clone(&network_node.april_tags);
 
     tokio::task::spawn(async move {
-        let server = udp_server::Server::new(server_data, server_client).await;
+        let server = udp_server::Server::new(server_path, server_client).await;
         server.run().await.unwrap();
     });
     tokio::task::spawn(async move {
@@ -81,6 +84,18 @@ async fn main() -> Result<(), rclrs::RclrsError> {
                 println!("Node is Alive with No data");
             }
             std::thread::sleep(std::time::Duration::from_millis(1000));
+        }
+    });
+    tokio::task::spawn(async move {
+        loop {
+            let april_tags_unlocked = localizer_april_tags.lock().unwrap();
+            if april_tags_unlocked.as_ref().is_some() {
+                let april_tags_pose = april_tags::localize(april_tags_unlocked);
+                if let Some(april_tags_pose) = april_tags_pose {
+                    // TODO: impl kalman filter
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
         }
     });
     rclrs::spin(Arc::clone(&network_node.node))
