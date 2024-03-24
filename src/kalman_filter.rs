@@ -1,0 +1,3 @@
+fn fuse(pose: Pose) {
+
+}

@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex};
 use nav_msgs::msg::Path as PathMsg;
 
+mod kalman_filter;
+pub mod pose;
 mod udp_server;
 
 struct NetworkNode {
@@ -8,14 +10,14 @@ struct NetworkNode {
     #[allow(dead_code)]
     subscription: Arc<rclrs::Subscription<PathMsg>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
-    data: Arc<Mutex<Option<PathMsg>>>,
+    path_data: Arc<Mutex<Option<PathMsg>>>,
 }
 
 impl NetworkNode {
     fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
-        let data = Arc::new(Mutex::new(None));
-        let data_cb = Arc::clone(&data);
+        let path_data = Arc::new(Mutex::new(None));
+        let data_cb = Arc::clone(&path_data);
         let subscription =
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
@@ -44,9 +46,9 @@ impl NetworkNode {
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
-    let server_data = Arc::clone(&network_node.data);
+    let server_data = Arc::clone(&network_node.path_data);
     let server_client = Arc::clone(&network_node.client);
-    let ping_data = Arc::clone(&network_node.data);
+    let ping_data = Arc::clone(&network_node.path_data);
 
     tokio::task::spawn(async move {
         let server = udp_server::Server::new(server_data, server_client).await;
