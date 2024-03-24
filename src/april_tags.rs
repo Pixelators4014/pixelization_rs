@@ -1,5 +1,9 @@
-use lazy_static::lazy_static;
 use std::collections::HashMap;
+
+use lazy_static::lazy_static;
+
+use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
+
 use crate::pose::{Point, Pose, EulerAngles};
 
 macro_rules! add_april_tag {
