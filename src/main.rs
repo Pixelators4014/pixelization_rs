@@ -56,5 +56,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
     });
-    rclrs::spin(Arc::clone(&network_node.node))
+    std::thread::spawn(move || {
+        rclrs::spin(Arc::clone(&network_node.node))
+    });
 }
