@@ -25,7 +25,7 @@ macro_rules! add_april_tag {
 lazy_static! {
     static ref APRIL_TAG_LOCATIONS: Vec<Option<Pose>> = {
         let mut v = Vec::new();
-        v.push(None)
+        v.push(None);
         v.push(Some(add_april_tag!(593.68, 9.68, 53.38, 120)));
         v.push(Some(add_april_tag!(637.21, 34.79, 53.38, 120)));
         v.push(Some(add_april_tag!(652.73, 196.17, 57.13, 180)));
