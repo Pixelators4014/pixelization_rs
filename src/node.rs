@@ -26,7 +26,7 @@ impl NetworkNode {
                 rclrs::QOS_PROFILE_DEFAULT,
                 move |msg: PathMsg| {
                     // This subscription now owns the data_cb variable
-                    *path_cb.blocking_read() = Some(msg);
+                    *path_cb.blocking_write() = Some(msg);
                 },
             )?;
         let april_tags = Arc::new(RwLock::new(None));
