@@ -1,23 +1,70 @@
 #[derive(Copy, Clone, Debug)]
 pub struct Point {
-    x: f32,
-    y: f32,
-    z: f32
+    pub x: f32,
+    pub y: f32,
+    pub z: f32
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct EulerAngles {
+    pub roll: f32,
+    pub pitch: f32,
+    pub yaw: f32
+}
+
+impl From<Quaternion> for EulerAngles {
+    fn from(q: Quaternion) -> Self {
+        let sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z);
+        let cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+        let roll = sinr_cosp.atan2(cosr_cosp);
+
+        let sinp = (1.0 + 2.0 * (q.w * q.y - q.x * q.z)).sqrt();
+        let cosp = (1.0 - 2.0 * (q.w * q.y - q.x * q.z)).sqrt();
+        let pitch = 2.0 * sinp.atan2(cosp) - std::f32::consts::PI / 2.0;
+
+        let siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+        let cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+        let yaw = siny_cosp.atan2(cosy_cosp);
+
+        EulerAngles { roll, pitch, yaw }
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct Quaternion {
-    w: f32,
-    x: f32,
-    y: f32,
-    z: f32
+    pub w: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32
 }
 
+impl From<EulerAngles> for Quaternion {
+    fn from(e: EulerAngles) -> Self {
+        let (w, x, y, z) = to_quaternion(e);
+        Quaternion { w, x, y, z }
+    }
+}
+
+fn to_quaternion(euler_angles: EulerAngles) -> (f32, f32, f32, f32) {
+    let cr = (euler_angles.roll * 0.5).cos();
+    let sr = (euler_angles.roll * 0.5).sin();
+    let cp = (euler_angles.pitch * 0.5).cos();
+    let sp = (euler_angles.pitch * 0.5).sin();
+    let cy = (euler_angles.yaw * 0.5).cos();
+    let sy = (euler_angles.yaw * 0.5).sin();
+
+    let w = cr * cp * cy + sr * sp * sy;
+    let x = sr * cp * cy - cr * sp * sy;
+    let y = cr * sp * cy + sr * cp * sy;
+    let z = cr * cp * sy - sr * sp * cy;
+
+    (w, x, y, z)
+}
 
 #[derive(Copy, Clone, Debug)]
 pub struct Pose {
-    position: Point,
-    orientation: Quaternion
+    pub position: Point,
+    pub orientation: Quaternion
 }
 
 impl Pose {
