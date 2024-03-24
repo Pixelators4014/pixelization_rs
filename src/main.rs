@@ -89,7 +89,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     tokio::task::spawn(async move {
         loop {
             let april_tags_unlocked_option = localizer_april_tags.lock().unwrap();
-            if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref().is_some() {
+            if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
                 let april_tags_pose = april_tags::localize(april_tags_unlocked.as_ref());
                 if let Some(april_tags_pose) = april_tags_pose {
                     // TODO: impl kalman filter
