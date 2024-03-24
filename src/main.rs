@@ -21,7 +21,7 @@ async fn run_ping(ping_data: Arc<Mutex<Option<PathMsg>>>) {
         } else {
             println!("Node is Alive with No data");
         }
-        std::thread::sleep(std::time::Duration::from_millis(1000));
+        tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
     }
 }
 
