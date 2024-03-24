@@ -55,6 +55,7 @@ impl NetworkNode {
             april_tags_subscription,
             client,
             path_data,
+            april_tags
         })
     }
 }
