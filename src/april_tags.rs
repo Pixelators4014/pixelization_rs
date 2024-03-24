@@ -66,7 +66,7 @@ lazy_static! {
 // 16 182.73 146.19 52.00 240°
 
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
-    let mut absolute_position = Vec::new();
+    // let mut absolute_positions = Vec::new();
     for detection in detections.detections.iter() {
         if let Some(position_option) = APRIL_TAG_LOCATIONS.get(detection.id as usize) {
             if let Some(position) = position_option {
