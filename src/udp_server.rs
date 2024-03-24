@@ -96,7 +96,7 @@ impl Server {
     async fn process_request(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = data.read().unwrap().as_ref() {
+                if let Some(msg) = data.read().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
