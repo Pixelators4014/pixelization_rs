@@ -3,7 +3,7 @@ use nav_msgs::msg::Path as PathMsg;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
 pub struct NetworkNode {
-    node: Arc<rclrs::Node>,
+    pub node: Arc<rclrs::Node>,
     #[allow(dead_code)]
     pub path_subscription: Arc<rclrs::Subscription<PathMsg>>,
     #[allow(dead_code)]
