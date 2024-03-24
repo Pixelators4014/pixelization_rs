@@ -30,7 +30,7 @@ impl AxisKalmanFilter {
         self.covariance += self.covariance1;
         self.kalman_gain = self.covariance / (self.covariance + self.covariance2);
         self.value += self.kalman_gain * (self.z - self.value);
-        self.covariance = (1 - self.kalman_gain) * self.covariance;
+        self.covariance = (1.0 - self.kalman_gain) * self.covariance;
 
         self.previous_value = self.value;
         self.previous_covariance = self.covariance;
