@@ -26,15 +26,15 @@ lazy_static! {
     static ref APRIL_TAG_LOCATIONS: Vec<Option<Pose>> = {
         let mut v = Vec::new();
         v.push(None)
-        v.push(Some(dd_april_tag!(593.68, 9.68, 53.38, 120)));
-        v.push(Some(dd_april_tag!(637.21, 34.79, 53.38, 120)));
-        v.push(Some(dd_april_tag!(652.73, 196.17, 57.13, 180)));
-        v.push(Some(dd_april_tag!(652.73, 218.42, 57.13, 180)));
-        v.push(Some(dd_april_tag!(578.77, 323.00, 53.38, 270)));
-        v.push(Some(dd_april_tag!(72.5, 323.00, 53.38, 270)));
-        v.push(Some(dd_april_tag!(-1.50, 218.42, 57.13, 0)));
-        v.push(Some(dd_april_tag!(-1.50, 196.17, 57.13, 0)));
-        v.push(Some(dd_april_tag!(14.02, 34.79, 53.38, 60)));
+        v.push(Some(add_april_tag!(593.68, 9.68, 53.38, 120)));
+        v.push(Some(add_april_tag!(637.21, 34.79, 53.38, 120)));
+        v.push(Some(add_april_tag!(652.73, 196.17, 57.13, 180)));
+        v.push(Some(add_april_tag!(652.73, 218.42, 57.13, 180)));
+        v.push(Some(add_april_tag!(578.77, 323.00, 53.38, 270)));
+        v.push(Some(add_april_tag!(72.5, 323.00, 53.38, 270)));
+        v.push(Some(add_april_tag!(-1.50, 218.42, 57.13, 0)));
+        v.push(Some(add_april_tag!(-1.50, 196.17, 57.13, 0)));
+        v.push(Some(add_april_tag!(14.02, 34.79, 53.38, 60)));
         v.push(Some(add_april_tag!(57.54, 9.68, 53.38, 60)));
         v.push(Some(add_april_tag!(468.69, 146.19, 52.00, 300)));
         v.push(Some(add_april_tag!(468.69, 177.10, 52.00, 60)));
