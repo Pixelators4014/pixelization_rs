@@ -65,6 +65,6 @@ lazy_static! {
 // 15 182.73 177.10 52.00 120°
 // 16 182.73 146.19 52.00 240°
 
-pub fn localize(detections: AprilTagDetectionArray) -> Option<Pose> {
+pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
     None
 }
