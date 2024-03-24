@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use lazy_static::lazy_static;
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
-use crate::pose::{Point, Pose, EulerAngles};
+use crate::pose::{Point, Pose, EulerAngles, Quaternion};
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
@@ -23,26 +21,28 @@ macro_rules! add_april_tag {
     }
 }
 
+// TODO: use vec
 lazy_static! {
-    static ref APRIL_TAG_LOCATIONS: HashMap<u32, Pose> = {
-        let mut m = HashMap::new();
-        m.insert(1, add_april_tag!(593.68, 9.68, 53.38, 120));
-        m.insert(2, add_april_tag!(637.21, 34.79, 53.38, 120));
-        m.insert(3, add_april_tag!(652.73, 196.17, 57.13, 180));
-        m.insert(4, add_april_tag!(652.73, 218.42, 57.13, 180));
-        m.insert(5, add_april_tag!(578.77, 323.00, 53.38, 270));
-        m.insert(6, add_april_tag!(72.5, 323.00, 53.38, 270));
-        m.insert(7, add_april_tag!(-1.50, 218.42, 57.13, 0));
-        m.insert(8, add_april_tag!(-1.50, 196.17, 57.13, 0));
-        m.insert(9, add_april_tag!(14.02, 34.79, 53.38, 60));
-        m.insert(10, add_april_tag!(57.54, 9.68, 53.38, 60));
-        m.insert(11, add_april_tag!(468.69, 146.19, 52.00, 300));
-        m.insert(12, add_april_tag!(468.69, 177.10, 52.00, 60));
-        m.insert(13, add_april_tag!(441.74, 161.62, 52.00, 180));
-        m.insert(14, add_april_tag!(441.74, 192.53, 52.00, 180));
-        m.insert(15, add_april_tag!(414.79, 177.10, 52.00, 180));
-        m.insert(16, add_april_tag!(414.79, 146.19, 52.00, 180));
-        m
+    static ref APRIL_TAG_LOCATIONS: Vec<Option<Pose>> = {
+        let mut v = Vec::new();
+        v.push(None)
+        v.insert(Some(dd_april_tag!(593.68, 9.68, 53.38, 120)));
+        v.insert(Some(dd_april_tag!(637.21, 34.79, 53.38, 120)));
+        v.insert(Some(dd_april_tag!(652.73, 196.17, 57.13, 180)));
+        v.insert(Some(dd_april_tag!(652.73, 218.42, 57.13, 180)));
+        v.insert(Some(dd_april_tag!(578.77, 323.00, 53.38, 270)));
+        v.insert(Some(dd_april_tag!(72.5, 323.00, 53.38, 270)));
+        v.insert(Some(dd_april_tag!(-1.50, 218.42, 57.13, 0)));
+        v.insert(Some(dd_april_tag!(-1.50, 196.17, 57.13, 0)));
+        v.insert(Some(dd_april_tag!(14.02, 34.79, 53.38, 60)));
+        v.insert(Some(add_april_tag!(57.54, 9.68, 53.38, 60)));
+        v.insert(Some(add_april_tag!(468.69, 146.19, 52.00, 300)));
+        v.insert(Some(add_april_tag!(468.69, 177.10, 52.00, 60)));
+        v.insert(Some(add_april_tag!(441.74, 161.62, 52.00, 180)));
+        v.insert(Some(add_april_tag!(441.74, 192.53, 52.00, 180)));
+        v.insert(Some(add_april_tag!(414.79, 177.10, 52.00, 180)));
+        v.insert(Some(add_april_tag!(414.79, 146.19, 52.00, 180)));
+        v
     };
 }
 
@@ -66,5 +66,19 @@ lazy_static! {
 // 16 182.73 146.19 52.00 240°
 
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
+    let mut absolute_position = Vec::new();
+    for detection in detections.detections.iter() {
+        if let Some(position_option) = APRIL_TAG_LOCATIONS.get(&detection.id) {
+            if let Some(position) = position_option {
+                let april_tag_pose = position;
+                let relative_robot_pose = Pose::from(detection.pose.pose);
+                let translation = Point {
+                    x: relative_robot_pose.position,
+                    y: relative_robot_pose.position,
+                    z: relative_robot_pose.position
+                };
+            }
+        }
+    }
     None
 }

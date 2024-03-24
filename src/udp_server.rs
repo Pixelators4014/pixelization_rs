@@ -100,19 +100,7 @@ impl Server {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
-                        let response = Pose {
-                            position: Point {
-                                x: last.pose.position.x as f32,
-                                y: last.pose.position.y as f32,
-                                z: last.pose.position.z as f32,
-                            },
-                            orientation: Quaternion {
-                                w: last.pose.orientation.w as f32,
-                                x: last.pose.orientation.x as f32,
-                                y: last.pose.orientation.y as f32,
-                                z: last.pose.orientation.z as f32,
-                            }
-                        };
+                        let response = Pose::from(last.pose);
                         response.into()
                     } else {
                         Response::Error("Server Error: No VSLAM data, please wait or check logs".to_string())

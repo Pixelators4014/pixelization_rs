@@ -1,9 +1,4 @@
-#[derive(Copy, Clone, Debug)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32
-}
+pub use nalgebra::Point3 as Point;
 
 #[derive(Copy, Clone, Debug)]
 pub struct EulerAngles {
@@ -94,5 +89,23 @@ impl Pose {
         bytes[20..24].copy_from_slice(&self.orientation.y.to_le_bytes());
         bytes[24..28].copy_from_slice(&self.orientation.z.to_le_bytes());
         bytes
+    }
+}
+
+impl From<geometry_msgs::msg::Pose> for Pose {
+    fn from(pose: geometry_msgs::msg::Pose) -> Self {
+        Self {
+            position: Point {
+                x: pose.position.x,
+                y: pose.position.y,
+                z: pose.position.z
+            },
+            orientation: Quaternion {
+                w: pose.orientation.w,
+                x: pose.orientation.x,
+                y: pose.orientation.y,
+                z: pose.orientation.z
+            }
+        }
     }
 }
