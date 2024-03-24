@@ -8,7 +8,7 @@ pub(crate) mod node;
 pub mod pose;
 mod udp_server;
 
-async fn run_server(server_path: Arc<Mutex<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, server_april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>) {
+async fn run_server(server_path: Arc<Mutex<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
     let server = udp_server::Server::new(server_path, server_client).await;
     server.run().await.unwrap();
 }
