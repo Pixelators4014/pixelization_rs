@@ -11,6 +11,8 @@ struct NetworkNode {
     node: Arc<rclrs::Node>,
     #[allow(dead_code)]
     path_subscription: Arc<rclrs::Subscription<PathMsg>>,
+    #[allow(dead_code)]
+    april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     path_data: Arc<Mutex<Option<PathMsg>>>,
     april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>,
