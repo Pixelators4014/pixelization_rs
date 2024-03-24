@@ -2,7 +2,8 @@ use nav_msgs::msg::Path as PathMsg;
 use std::io;
 use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use crate::pose::{Pose, Quaternion, Point};
 
 
@@ -76,14 +77,14 @@ struct Packet {
 }
 
 pub struct Server {
-    data: Arc<Mutex<Option<PathMsg>>>,
+    data: Arc<RwLock<Option<PathMsg>>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     socket: Arc<UdpSocket>,
     milli_start: u32, // TODO: Fix
 }
 
 impl Server {
-    pub async fn new(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) -> Self {
+    pub async fn new(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) -> Self {
         Self {
             data,
             client,
@@ -92,10 +93,10 @@ impl Server {
         }
     }
 
-    async fn process_request(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, request: Request) -> Response {
+    async fn process_request(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
-                if let Some(msg) = data.lock().unwrap().as_ref() {
+                if let Some(msg) = data.read().unwrap().as_ref() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
@@ -147,7 +148,7 @@ impl Server {
         }
     }
 
-    pub async fn handle_bytes(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
+    pub async fn handle_bytes(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         if let Some(request) = request {
             Self::process_request(data, client, milli_start, request).await.to_bytes()

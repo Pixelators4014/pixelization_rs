@@ -14,7 +14,7 @@ async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Ar
     server.run().await.unwrap();
 }
 
-async fn run_ping(ping_data: Arc<Mutex<Option<PathMsg>>>) {
+async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
     loop {
         let data = ping_data.read().await;
         if data.is_some() {
