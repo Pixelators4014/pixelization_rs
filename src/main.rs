@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use nav_msgs::msg::Path as PathMsg;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
@@ -8,14 +9,14 @@ pub(crate) mod node;
 pub mod pose;
 mod udp_server;
 
-async fn run_server(server_path: Arc<Mutex<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
+async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
     let server = udp_server::Server::new(server_path, server_client).await;
     server.run().await.unwrap();
 }
 
 async fn run_ping(ping_data: Arc<Mutex<Option<PathMsg>>>) {
     loop {
-        let data = ping_data.lock().unwrap();
+        let data = ping_data.read().await;
         if data.is_some() {
             println!("Node is Alive and Running");
         } else {
