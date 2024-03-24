@@ -7,11 +7,11 @@ use crate::pose::{Point, Pose, EulerAngles, Quaternion};
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
         Pose {
-            position: Point {
-                x: $x * 39.37,
-                y: $y * 39.37,
-                z: $z * 39.37,
-            },
+            position: Point::new(
+                $x * 39.37,
+                $y * 39.37,
+                $z * 39.37
+            ),
             orientation: EulerAngles {
                 roll: 0.0,
                 pitch: 0.0,
@@ -68,7 +68,7 @@ lazy_static! {
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
     let mut absolute_position = Vec::new();
     for detection in detections.detections.iter() {
-        if let Some(position_option) = APRIL_TAG_LOCATIONS.get(&detection.id as usize) {
+        if let Some(position_option) = APRIL_TAG_LOCATIONS.get(detection.id as usize) {
             if let Some(position) = position_option {
                 let april_tag_pose = position;
                 let relative_robot_pose = Pose::from(detection.pose.pose.pose);
