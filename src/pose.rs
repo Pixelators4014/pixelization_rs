@@ -69,11 +69,10 @@ pub struct Pose {
 impl Pose {
     pub fn from_bytes(bytes: &[u8]) -> Self {
         Self {
-            position: Point {
-                x: f32::from_le_bytes(bytes[0..4].try_into().unwrap()),
-                y: f32::from_le_bytes(bytes[4..8].try_into().unwrap()),
-                z: f32::from_le_bytes(bytes[8..12].try_into().unwrap()),
-            },
+            position: Point::new(
+                f32::from_le_bytes(bytes[0..4].try_into().unwrap()),
+                f32::from_le_bytes(bytes[4..8].try_into().unwrap()),
+                f32::from_le_bytes(bytes[8..12].try_into().unwrap())),
             orientation: Quaternion {
                 w: f32::from_le_bytes(bytes[12..16].try_into().unwrap()),
                 x: f32::from_le_bytes(bytes[16..20].try_into().unwrap()),
