@@ -3,7 +3,7 @@ use std::io;
 use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
 use std::sync::{Arc, Mutex};
-use crate::pose::Pose;
+use crate::pose::{Pose, Quaternion, Point};
 
 
 enum Request {
@@ -100,13 +100,17 @@ impl Server {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
                         let response = Pose {
-                            x: last.pose.position.x as f32,
-                            y: last.pose.position.y as f32,
-                            z: last.pose.position.z as f32,
-                            angle_w: last.pose.orientation.w as f32,
-                            angle_x: last.pose.orientation.x as f32,
-                            angle_y: last.pose.orientation.y as f32,
-                            angle_z: last.pose.orientation.z as f32,
+                            position: Point {
+                                x: last.pose.position.x as f32,
+                                y: last.pose.position.y as f32,
+                                z: last.pose.position.z as f32,
+                            },
+                            orientation: Quaternion {
+                                w: last.pose.orientation.w as f32,
+                                x: last.pose.orientation.x as f32,
+                                y: last.pose.orientation.y as f32,
+                                z: last.pose.orientation.z as f32,
+                            }
                         };
                         response.into()
                     } else {

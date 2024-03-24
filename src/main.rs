@@ -38,7 +38,7 @@ impl NetworkNode {
             node,
             subscription,
             client,
-            data,
+            path_data,
         })
     }
 }

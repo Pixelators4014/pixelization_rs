@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use crate::pose::{Point, Pose};
+use crate::pose::{Point, Pose, EulerAngles};
 
 lazy_static! {
     static ref APRIL_TAG_LOCATIONS: HashMap<u32, Pose> = {
@@ -18,7 +18,7 @@ lazy_static! {
             }.into()
         });
     };
-};
+}
 
 // 1 593.68 9.68 53.38 120°
 // 2 637.21 34.79 53.38 120°
