@@ -1,0 +1,52 @@
+pub struct NetworkNode {
+    node: Arc<rclrs::Node>,
+    #[allow(dead_code)]
+    pub path_subscription: Arc<rclrs::Subscription<PathMsg>>,
+    #[allow(dead_code)]
+    pub april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
+    pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+    pub path: Arc<Mutex<Option<PathMsg>>>,
+    pub april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>,
+}
+
+impl NetworkNode {
+    pub fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
+        let node = rclrs::Node::new(context, "network_node")?;
+        let path = Arc::new(Mutex::new(None));
+        let path_cb = Arc::clone(&path);
+        let path_subscription =
+            // Create a new shared pointer instance that will be owned by the closure
+            node.create_subscription(
+                "/visual_slam/tracking/slam_path",
+                rclrs::QOS_PROFILE_DEFAULT,
+                move |msg: PathMsg| {
+                    // This subscription now owns the data_cb variable
+                    *path_cb.lock().unwrap() = Some(msg);
+                },
+            )?;
+        let april_tags = Arc::new(Mutex::new(None));
+        let april_tags_cb = Arc::clone(&april_tags);
+        let april_tags_subscription = node.create_subscription(
+            "tag_detections",
+            rclrs::QOS_PROFILE_DEFAULT,
+            move |msg: AprilTagDetectionArray| {
+                // This subscription now owns the data_cb variable
+                *april_tags_cb.lock().unwrap() = Some(msg);
+            },
+        )?;
+
+        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>("visual_slam/set_odometry_pose")?;
+        while !client.service_is_ready()? {
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            println!("Waiting for service to initialize ...");
+        }
+        Ok(Self {
+            node,
+            path_subscription,
+            april_tags_subscription,
+            client,
+            path,
+            april_tags
+        })
+    }
+}
