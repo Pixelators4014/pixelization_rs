@@ -98,16 +98,16 @@ impl Pose {
 impl From<geometry_msgs::msg::Pose> for Pose {
     fn from(pose: geometry_msgs::msg::Pose) -> Self {
         Self {
-            position: Point {
-                x: pose.position.x,
-                y: pose.position.y,
-                z: pose.position.z
-            },
+            position: Point::new(
+                pose.position.x as f32,
+                pose.position.y as f32,
+                pose.position.z as f32
+            ),
             orientation: Quaternion {
-                w: pose.orientation.w,
-                x: pose.orientation.x,
-                y: pose.orientation.y,
-                z: pose.orientation.z
+                w: pose.orientation.w as f32,
+                x: pose.orientation.x as f32,
+                y: pose.orientation.y as f32,
+                z: pose.orientation.z as f32
             }
         }
     }
