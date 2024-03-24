@@ -1,8 +1,6 @@
 use nalgebra::Point3;
 
-type Point = Point3<f32>;
-
-
+pub type Point = Point3<f32>;
 
 #[derive(Copy, Clone, Debug)]
 pub struct EulerAngles {
