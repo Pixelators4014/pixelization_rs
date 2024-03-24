@@ -29,7 +29,6 @@ RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_object_detection --d
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam --depth 1
 RUN git clone https://github.com/ros2-rust/ros2_rust --depth 1
 RUN git clone https://github.com/IntelRealSense/realsense-ros --depth 1
-COPY . pixelization_rs
 
 # Copy files
 COPY /usr/bin/tegrastats /usr/bin/tegrastats
@@ -47,6 +46,8 @@ COPY /usr/src/jetson_multimedia_api /usr/src/jetson_multimedia_api
 COPY /opt/nvidia/nsight-systems-cli /opt/nvidia/nsight-systems-cli
 COPY /opt/nvidia/vpi2 /opt/nvidia/vpi2
 COPY /usr/share/vpi2 /usr/share/vpi2
+
+COPY . pixelization_rs
 
 WORKDIR /workspaces/isaac_ros-dev
 
