@@ -72,11 +72,6 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
             if let Some(position) = position_option {
                 let april_tag_pose = position;
                 let relative_robot_pose = Pose::from(detection.pose.pose.pose);
-                let translation = Point::new(
-                    relative_robot_pose.position,
-                    relative_robot_pose.position,
-                    relative_robot_pose.position
-                );
             }
         }
     }
