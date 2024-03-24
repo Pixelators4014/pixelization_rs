@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use nav_msgs::msg::Path as PathMsg;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
@@ -9,14 +10,14 @@ pub struct NetworkNode {
     #[allow(dead_code)]
     pub april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
     pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
-    pub path: Arc<Mutex<Option<PathMsg>>>,
-    pub april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>,
+    pub path: Arc<RwLock<Option<PathMsg>>>,
+    pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
 }
 
 impl NetworkNode {
     pub fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
-        let path = Arc::new(Mutex::new(None));
+        let path = Arc::new(RwLock::new(None));
         let path_cb = Arc::clone(&path);
         let path_subscription =
             // Create a new shared pointer instance that will be owned by the closure
@@ -25,10 +26,10 @@ impl NetworkNode {
                 rclrs::QOS_PROFILE_DEFAULT,
                 move |msg: PathMsg| {
                     // This subscription now owns the data_cb variable
-                    *path_cb.lock().unwrap() = Some(msg);
+                    *path_cb.write().unwrap() = Some(msg);
                 },
             )?;
-        let april_tags = Arc::new(Mutex::new(None));
+        let april_tags = Arc::new(RwLock::new(None));
         let april_tags_cb = Arc::clone(&april_tags);
         let april_tags_subscription = node.create_subscription(
             "tag_detections",
