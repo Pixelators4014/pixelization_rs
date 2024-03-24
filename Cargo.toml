@@ -12,6 +12,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
 tokio = { version = "1", features = ["full"] }
+lazy_static = "1.4.0"
 
 [dependencies.rclrs]
 version = "0.4"
