@@ -29,6 +29,9 @@ version = "*"
 [dependencies.geometry_msgs]
 version = "*"
 
+[dependencies.isaac_ros_apriltag_interfaces]
+version = "*"
+
 [dependencies.isaac_ros_visual_slam_interfaces]
 version = "*"
 

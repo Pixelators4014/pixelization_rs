@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 use nav_msgs::msg::Path as PathMsg;
+use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
 mod april_tags;
 mod kalman_filter;
@@ -9,26 +10,38 @@ mod udp_server;
 struct NetworkNode {
     node: Arc<rclrs::Node>,
     #[allow(dead_code)]
-    subscription: Arc<rclrs::Subscription<PathMsg>>,
+    path_subscription: Arc<rclrs::Subscription<PathMsg>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     path_data: Arc<Mutex<Option<PathMsg>>>,
+    april_tags: Arc<Mutex<Option<AprilTagDetectionArray>>>,
 }
 
 impl NetworkNode {
     fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
         let path_data = Arc::new(Mutex::new(None));
-        let data_cb = Arc::clone(&path_data);
-        let subscription =
+        let path_data_cb = Arc::clone(&path_data);
+        let path_subscription =
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
                 "/visual_slam/tracking/slam_path",
                 rclrs::QOS_PROFILE_DEFAULT,
                 move |msg: PathMsg| {
                     // This subscription now owns the data_cb variable
-                    *data_cb.lock().unwrap() = Some(msg);
+                    *path_data_cb.lock().unwrap() = Some(msg);
                 },
             )?;
+        let april_tags = Arc::new(Mutex::new(None));
+        let april_tags_cb = Arc::clone(&april_tags);
+        let april_tags_subscription = node.create_subscription(
+            "tag_detections",
+            rclrs::QOS_PROFILE_DEFAULT,
+            move |msg: AprilTagDetectionArray| {
+                // This subscription now owns the data_cb variable
+                *april_tags_cb.lock().unwrap() = Some(msg);
+            },
+        )?;
+
         let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>("visual_slam/set_odometry_pose")?;
         while !client.service_is_ready()? {
             std::thread::sleep(std::time::Duration::from_millis(10));
@@ -36,7 +49,8 @@ impl NetworkNode {
         }
         Ok(Self {
             node,
-            subscription,
+            path_subscription,
+            april_tags_subscription,
             client,
             path_data,
         })
