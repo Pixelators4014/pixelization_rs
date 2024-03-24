@@ -112,20 +112,22 @@ struct Packet {
 
 pub struct Server {
     data: Arc<Mutex<Option<PathMsg>>>,
+    client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     socket: Arc<UdpSocket>,
     milli_start: u32, // TODO: Fix
 }
 
 impl Server {
-    pub async fn new(data: Arc<Mutex<Option<PathMsg>>>) -> Self {
+    pub async fn new(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) -> Self {
         Self {
             data,
+            client,
             socket: Arc::new(UdpSocket::bind("127.0.0.1:8080").await.unwrap()),
             milli_start: now_millis_u31(),
         }
     }
 
-    async fn process_request(data: Arc<Mutex<Option<PathMsg>>>, milli_start: u32, request: Request) -> Response {
+    async fn process_request(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.lock().unwrap().as_ref() {
@@ -150,7 +152,23 @@ impl Server {
                 }
             }
             Request::SetVslamPose(pose) => {
-                // TODO: Fix
+                let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                    pose: geometry_msgs::msg::Pose {
+                        position: geometry_msgs::msg::Point {
+                            x: pose.x as f64,
+                            y: pose.y as f64,
+                            z: pose.z as f64,
+                        },
+                        orientation: geometry_msgs::msg::Quaternion {
+                            w: pose.angle_w as f64,
+                            x: pose.angle_x as f64,
+                            y: pose.angle_y as f64,
+                            z: pose.angle_z as f64,
+                        }
+                    }
+                };
+                let response = client.call_async(&service_request).await.unwrap();
+                // TODO: Better handling of service error or rclrs error
                 Response::Success
             }
             Request::GetDetections => {
@@ -160,10 +178,10 @@ impl Server {
         }
     }
 
-    pub async fn handle_bytes(data: Arc<Mutex<Option<PathMsg>>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
+    pub async fn handle_bytes(data: Arc<Mutex<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         if let Some(request) = request {
-            Self::process_request(data, milli_start, request).await.to_bytes()
+            Self::process_request(data, client, milli_start, request).await.to_bytes()
         } else {
             Response::Error("Invalid Request (first byte not valid)".to_string()).to_bytes()
         }
@@ -174,6 +192,7 @@ impl Server {
         let (tx, mut rx) = mpsc::channel(128);
         let task_socket = Arc::clone(&self.socket);
         let task_data = Arc::clone(&self.data);
+        let task_client = Arc::clone(&self.client);
         let task_milli_start = self.milli_start;
         tokio::spawn(async move {
             loop {
@@ -187,8 +206,9 @@ impl Server {
 
                     let shared_tx = tx.clone();
                     let inner_data = Arc::clone(&task_data);
+                    let inner_client = Arc::clone(&task_client);
                     tokio::spawn(async move {
-                        let new_bytes = Self::handle_bytes(Arc::clone(&inner_data), task_milli_start, &packet.buf).await;
+                        let new_bytes = Self::handle_bytes(Arc::clone(&inner_data), Arc::clone(&inner_client), task_milli_start, &packet.buf).await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes

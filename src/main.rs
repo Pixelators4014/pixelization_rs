@@ -45,10 +45,11 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(NetworkNode::new(&context)?);
     let server_data = Arc::clone(&network_node.data);
+    let server_client = Arc::clone(&network_node.client);
     let ping_data = Arc::clone(&network_node.data);
 
     tokio::task::spawn(async move {
-        let server = udp_server::Server::new(server_data).await;
+        let server = udp_server::Server::new(server_data, server_client).await;
         server.run().await.unwrap();
     });
     tokio::task::spawn(async move {
