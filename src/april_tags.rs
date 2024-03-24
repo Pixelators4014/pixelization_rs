@@ -17,6 +17,7 @@ lazy_static! {
                 yaw: 120.0_f32.to_radians(),
             }.into()
         });
+        m
     };
 }
 
