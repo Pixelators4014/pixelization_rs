@@ -1,8 +1,8 @@
 use std::ops::{Add, Neg};
 
-use nalgebra::Point3;
+use nalgebra::Vec3;
 
-pub type Point = Point3<f32>;
+pub type Point = Vec3<f32>;
 
 #[derive(Copy, Clone, Debug)]
 pub struct EulerAngles {
