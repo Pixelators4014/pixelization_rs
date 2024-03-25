@@ -6,7 +6,7 @@ use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
-        Isometry3::from_parts(
+        nalgebra::Isometry3::from_parts(
             nalgebra::Translation3::new(
                 ($x * 39.37) as f32,
                 ($y * 39.37) as f32,
