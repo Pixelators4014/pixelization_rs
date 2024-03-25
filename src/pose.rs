@@ -1,6 +1,6 @@
 use std::ops::{Add, Neg};
 
-use nalgebra::Vec3;
+use nalgebra::Vector3;
 
 pub type Point = Vec3<f32>;
 
