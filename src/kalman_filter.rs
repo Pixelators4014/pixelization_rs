@@ -111,3 +111,8 @@ impl QuaternionKalmanFilter {
         self.z.value()
     }
 }
+
+struct PoseKalmanFilter {
+    translation: TranslationKalmanFilter,
+    rotation: QuaternionKalmanFilter
+}
