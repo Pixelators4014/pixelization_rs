@@ -107,7 +107,7 @@ impl Server {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
-                        let response = Pose::from(&last.pose);
+                        let response = crate::util::pose_to_isometry(&last.pose);
                         response.into()
                     } else {
                         Response::Error("Server Error: No VSLAM data, please wait or check logs".to_string())
