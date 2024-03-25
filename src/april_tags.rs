@@ -6,7 +6,7 @@ use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
-        Pose {
+        Isometry3 {
             position: Point::new(
                 $x * 39.37,
                 $y * 39.37,
