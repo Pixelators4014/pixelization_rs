@@ -67,9 +67,9 @@ lazy_static! {
 // 15 182.73 177.10 52.00 120°
 // 16 182.73 146.19 52.00 240°
 
-fn calc_abs_covariance(values: [f64; 32]) -> f32 {
-    let sum = values.iter().sum::<f32>();
-    sum.sqrt()
+fn calc_abs_covariance(values: [f64; 36]) -> f32 {
+    let sum = values.iter().sum::<f64>();
+    sum.sqrt() as f32
 }
 
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
