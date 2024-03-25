@@ -4,8 +4,6 @@ use lazy_static::lazy_static;
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
-use crate::pose::{Point, Pose, EulerAngles};
-
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
         Pose {
