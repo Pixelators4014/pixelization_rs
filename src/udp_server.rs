@@ -5,6 +5,8 @@ use tokio::sync::mpsc;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+use nalgebra::{Rotation3, UnitQuaternion, Quaternion};
+
 struct Pose {
     x: f32,
     y: f32,
