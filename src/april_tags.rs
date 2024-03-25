@@ -67,8 +67,13 @@ lazy_static! {
 // 15 182.73 177.10 52.00 120°
 // 16 182.73 146.19 52.00 240°
 
+fn calc_abs_covariance() -> f32 {
+
+}
+
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
-    // let mut absolute_positions = Vec::new();
+    let mut lowest_covariance = f32::MAX;
+    let mut best_pose = None;
     for detection in detections.detections.iter() {
         if let Some(position_option) = APRIL_TAG_LOCATIONS.get(detection.id as usize) {
             if let Some(position) = position_option {
@@ -82,9 +87,13 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
                     position: inverse_robot_pose.position + april_tag_pose.position,
                     orientation: (EulerAngles::from(april_tag_pose.orientation) + EulerAngles::from(inverse_robot_pose.orientation)).into()
                 };
-                return Some(absolute_robot_pose);
+                let covariance = calc_abs_covariance(&detection.pose.pose.covariance);
+                if covariance < lowest_covariance {
+                    best_pose = Some(absolute_robot_pose);
+                    lowest_covariance = covariance;
+                }
             }
         }
     }
-    None
+    best_pose
 }
