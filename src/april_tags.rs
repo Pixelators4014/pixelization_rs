@@ -67,8 +67,9 @@ lazy_static! {
 // 15 182.73 177.10 52.00 120°
 // 16 182.73 146.19 52.00 240°
 
-fn calc_abs_covariance() -> f32 {
-
+fn calc_abs_covariance(values: [f64; 32]) -> f32 {
+    let sum = values.iter().sum::<f32>();
+    sum.sqrt()
 }
 
 pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
@@ -87,7 +88,7 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
                     position: inverse_robot_pose.position + april_tag_pose.position,
                     orientation: (EulerAngles::from(april_tag_pose.orientation) + EulerAngles::from(inverse_robot_pose.orientation)).into()
                 };
-                let covariance = calc_abs_covariance(&detection.pose.pose.covariance);
+                let covariance = calc_abs_covariance(detection.pose.pose.covariance);
                 if covariance < lowest_covariance {
                     best_pose = Some(absolute_robot_pose);
                     lowest_covariance = covariance;
