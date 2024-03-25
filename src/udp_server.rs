@@ -120,9 +120,9 @@ impl Server {
                 let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
                     pose: geometry_msgs::msg::Pose {
                         position: geometry_msgs::msg::Point {
-                            x: pose.position.x as f64,
-                            y: pose.position.y as f64,
-                            z: pose.position.z as f64,
+                            x: pose.x as f64,
+                            y: pose.y as f64,
+                            z: pose.z as f64,
                         },
                         orientation: geometry_msgs::msg::Quaternion {
                             w: pose.orientation.w as f64,
