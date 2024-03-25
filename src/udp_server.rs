@@ -16,6 +16,19 @@ struct Pose {
     yaw: f32
 }
 
+impl Pose {
+    fn from_bytes(bytes: &[u8]) -> Self {
+        return Self {
+            x: f32::from_le_bytes(bytes[0..4].try_into().unwrap()),
+            y: f32::from_le_bytes(bytes[4..8].try_into().unwrap()),
+            z: f32::from_le_bytes(bytes[8..12].try_into().unwrap()),
+            roll: f32::from_le_bytes(bytes[12..16].try_into().unwrap()),
+            pitch: f32::from_le_bytes(bytes[16..20].try_into().unwrap()),
+            yaw: f32::from_le_bytes(bytes[20..24].try_into().unwrap()),
+        }
+    }
+}
+
 enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
