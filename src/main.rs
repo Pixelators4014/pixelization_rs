@@ -17,8 +17,8 @@ async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Ar
 async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
     loop {
         let data = ping_data.read().await;
-        if data.is_some() {
-            println!("Node is Alive and Running");
+        if let Some(path_option) = data {
+            println!("Node is Alive and Running: {path_option:?}");
         } else {
             println!("Node is Alive with No data");
         }
