@@ -17,8 +17,12 @@ async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Ar
 async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
     loop {
         let data = ping_data.read().await;
-        if let Some(path_option) = data {
-            println!("Node is Alive and Running: {path_option:?}");
+        if let Some(path_option) = data.as_ref() {
+            if let Some(path) = path_option.poses.last() {
+                println!("Node is Alive and Running: {path:?}");
+            } else {
+                println!("VSLAM has not inited yet")
+            }
         } else {
             println!("Node is Alive with No data");
         }
