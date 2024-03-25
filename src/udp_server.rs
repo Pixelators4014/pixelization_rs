@@ -27,6 +27,17 @@ impl Pose {
             yaw: f32::from_le_bytes(bytes[20..24].try_into().unwrap()),
         }
     }
+
+    fn to_bytes(&self) -> [u8; 24] {
+        let mut bytes = [0u8; 24];
+        bytes[0..4].copy_from_slice(&self.x.to_le_bytes());
+        bytes[4..8].copy_from_slice(&self.y.to_le_bytes());
+        bytes[8..12].copy_from_slice(&self.z.to_le_bytes());
+        bytes[12..16].copy_from_slice(&self.roll.to_le_bytes());
+        bytes[16..20].copy_from_slice(&self.pitch.to_le_bytes());
+        bytes[20..24].copy_from_slice(&self.yaw.to_le_bytes());
+        return bytes;
+    }
 }
 
 enum Request {
