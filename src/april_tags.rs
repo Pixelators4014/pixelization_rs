@@ -79,7 +79,10 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
                 let april_tag_pose = position;
                 let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
                 let inverse_robot_pose = relative_robot_pose.inverse();
-                let absolute_robot_pose = relative_robot_pose + inverse_robot_pose;
+                let absolute_robot_pose = Isometry3::from_parts(
+                    april_tag_pose.translation + inverse_robot_pose.translation,
+                    april_tag_pose.rotation * inverse_robot_pose.rotation,
+                );
                 let covariance = calc_abs_covariance(detection.pose.pose.covariance);
                 if covariance < lowest_covariance {
                     best_pose = Some(absolute_robot_pose);
