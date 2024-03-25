@@ -57,7 +57,9 @@ async fn main() -> Result<(), rclrs::RclrsError> {
         }
     });
     std::thread::spawn(move || {
-        rclrs::spin(Arc::clone(&network_node.node));
+        if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
+            println!("{:?}", e);
+        }
     });
     Ok(())
 }
