@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
-use nalgebra::Isometry3;
+use nalgebra::{Isometry3, Translation3};
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
@@ -80,7 +80,7 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
                 let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
                 let inverse_robot_pose = relative_robot_pose.inverse();
                 let absolute_robot_pose = Isometry3::from_parts(
-                    april_tag_pose.translation + inverse_robot_pose.translation,
+                    Translation3::new(april_tag_pose.translation.vector + inverse_robot_pose.translation.vector),
                     april_tag_pose.rotation * inverse_robot_pose.rotation,
                 );
                 let covariance = calc_abs_covariance(detection.pose.pose.covariance);
