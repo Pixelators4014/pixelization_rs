@@ -8,15 +8,13 @@ macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
         Isometry3::from_parts(
             nalgebra::Translation3::new(
-            ($x * 39.37) as f32,
-            ($y * 39.37) as f32,
-            ($z * 39.37) as f32
-        ),
-            orientation: EulerAngles {
-                roll: 0.0,
-                pitch: 0.0,
-                yaw: ($angle as f32).to_radians(),
-            }.into()
+                ($x * 39.37) as f32,
+                ($y * 39.37) as f32,
+                ($z * 39.37) as f32
+            ),
+            nalgebra::geometry::UnitQuaternion(
+                nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle as f32)
+            )
         )
     }
 }
