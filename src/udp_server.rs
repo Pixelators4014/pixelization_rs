@@ -107,8 +107,13 @@ impl Server {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
-                        let response = crate::util::pose_to_isometry(&last.pose);
-                        response.into()
+                        let response = Pose {
+                            x: last.pose.position.x as f32,
+                            y: last.pose.position.y as f32,
+                            z: last.pose.position.z as f32,
+
+                        };
+                        Response::Pose(response.into())
                     } else {
                         Response::Error("Server Error: No VSLAM data, please wait or check logs".to_string())
                     }
@@ -117,7 +122,7 @@ impl Server {
                 }
             }
             Request::SetVslamPose(pose) => {
-                let quaternion = nalgebra::Quaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
+                let quaternion = nalgebra::UnitQuaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw).quaternion();
                 let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
                     pose: geometry_msgs::msg::Pose {
                         position: geometry_msgs::msg::Point {
