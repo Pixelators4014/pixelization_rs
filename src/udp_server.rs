@@ -117,6 +117,7 @@ impl Server {
                 }
             }
             Request::SetVslamPose(pose) => {
+                let quaternion = nalgebra::Quaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
                 let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
                     pose: geometry_msgs::msg::Pose {
                         position: geometry_msgs::msg::Point {
@@ -125,10 +126,10 @@ impl Server {
                             z: pose.z as f64,
                         },
                         orientation: geometry_msgs::msg::Quaternion {
-                            w: pose.orientation.w as f64,
-                            x: pose.orientation.x as f64,
-                            y: pose.orientation.y as f64,
-                            z: pose.orientation.z as f64,
+                            w: quaternion.coords[3] as f64,
+                            x: quaternion.coords[0] as f64,
+                            y: quaternion.coords[1] as f64,
+                            z: quaternion.coords[2] as f64,
                         }
                     }
                 };
