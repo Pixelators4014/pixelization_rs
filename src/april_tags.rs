@@ -6,24 +6,25 @@ use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
-        Isometry3 {
-            position: Point::new(
-                $x * 39.37,
-                $y * 39.37,
-                $z * 39.37
-            ),
+        let translation = nalgebra::Translation3::new(
+            ($x * 39.37) as f32,
+            ($y * 39.37) as f32,
+            ($z * 39.37) as f32
+        );
+        Isometry3::from_parts(
+            translation,
             orientation: EulerAngles {
                 roll: 0.0,
                 pitch: 0.0,
                 yaw: ($angle as f32).to_radians(),
             }.into()
-        }
+        )
     }
 }
 
 // TODO: use vec
 lazy_static! {
-    static ref APRIL_TAG_LOCATIONS: Vec<Option<Pose>> = {
+    static ref APRIL_TAG_LOCATIONS: Vec<Option<Isometry3<f32>>> = {
         let mut v = Vec::new();
         v.push(None);
         v.push(Some(add_april_tag!(593.68, 9.68, 53.38, 120)));
@@ -70,7 +71,7 @@ fn calc_abs_covariance(values: [f64; 36]) -> f32 {
     sum.sqrt() as f32
 }
 
-pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
+pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
     let mut lowest_covariance = f32::MAX;
     let mut best_pose = None;
     for detection in detections.detections.iter() {
