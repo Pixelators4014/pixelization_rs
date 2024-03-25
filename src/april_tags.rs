@@ -12,7 +12,7 @@ macro_rules! add_april_tag {
                 ($y * 39.37) as f32,
                 ($z * 39.37) as f32
             ),
-            nalgebra::geometry::UnitQuaternion(
+            nalgebra::geometry::UnitQuaternion::from(
                 nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle as f32)
             )
         )
