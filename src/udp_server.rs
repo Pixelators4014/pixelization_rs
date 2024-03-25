@@ -4,8 +4,15 @@ use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::pose::{Pose, Quaternion, Point};
 
+struct Pose {
+    x: f32,
+    y: f32,
+    z: f32,
+    roll: f32,
+    pitch: f32,
+    yaw: f32
+}
 
 enum Request {
     GetVslamPose,
