@@ -76,10 +76,7 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
             if let Some(position) = position_option {
                 let april_tag_pose = position;
                 let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
-                let inverse_robot_pose = Pose {
-                    position: relative_robot_pose.position.neg(),
-                    orientation: EulerAngles::from(relative_robot_pose.orientation).neg().into()
-                };
+                let inverse_robot_pose = relative_robot_pose.inverse();
                 let absolute_robot_pose = Pose {
                     position: inverse_robot_pose.position + april_tag_pose.position,
                     orientation: (EulerAngles::from(april_tag_pose.orientation) + EulerAngles::from(inverse_robot_pose.orientation)).into()
