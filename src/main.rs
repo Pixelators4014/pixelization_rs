@@ -51,6 +51,24 @@ async fn main() -> Result<(), rclrs::RclrsError> {
                 let april_tags_pose = april_tags::localize(april_tags_unlocked);
                 if let Some(april_tags_pose) = april_tags_pose {
                     // TODO: impl kalman filter
+                    let final_pose = april_tags_pose;
+                    let client = Arc::clone(&localizer_client);
+                    let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                        pose: geometry_msgs::msg::Pose {
+                            position: geometry_msgs::msg::Point {
+                                x: final_pose.position.x as f64,
+                                y: final_pose.position.y as f64,
+                                z: final_pose.position.z as f64,
+                            },
+                            orientation: geometry_msgs::msg::Quaternion {
+                                w: final_pose.orientation.w as f64,
+                                x: final_pose.orientation.x as f64,
+                                y: final_pose.orientation.y as f64,
+                                z: final_pose.orientation.z as f64,
+                            }
+                        }
+                    };
+                    let response = client.call_async(&service_request).await.unwrap();
                 }
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
