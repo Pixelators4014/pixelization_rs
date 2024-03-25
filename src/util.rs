@@ -1,4 +1,4 @@
-use nalgebra::Isometry3;
+use nalgebra::{Isometry3, Quaternion};
 
 pub fn pose_to_isometry(pose: &geometry_msgs::msg::Pose) {
     Isometry3::from_parts(
