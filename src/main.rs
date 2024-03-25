@@ -56,15 +56,15 @@ async fn main() -> Result<(), rclrs::RclrsError> {
                     let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
                         pose: geometry_msgs::msg::Pose {
                             position: geometry_msgs::msg::Point {
-                                x: final_pose.position.x as f64,
-                                y: final_pose.position.y as f64,
-                                z: final_pose.position.z as f64,
+                                x: final_pose.translation.x as f64,
+                                y: final_pose.translation.y as f64,
+                                z: final_pose.translation.z as f64,
                             },
                             orientation: geometry_msgs::msg::Quaternion {
-                                w: final_pose.orientation.w as f64,
-                                x: final_pose.orientation.x as f64,
-                                y: final_pose.orientation.y as f64,
-                                z: final_pose.orientation.z as f64,
+                                w: final_pose.rotation.quaternion().coords[3] as f64,
+                                x: final_pose.rotation.quaternion().coords[0] as f64,
+                                y: final_pose.rotation.quaternion().coords[1] as f64,
+                                z: final_pose.rotation.quaternion().coords[2] as f64,
                             }
                         }
                     };
