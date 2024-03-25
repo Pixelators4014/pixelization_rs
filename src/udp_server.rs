@@ -107,10 +107,14 @@ impl Server {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
                         let header = (now - milli_start) as u32; // TODO: rework into return system
+                        let rotation = Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(last.pose.orientation.w, last.pose.orientation.x, last.pose.orientation.y, last.pose.orientation.z))).euler_angles();
                         let response = Pose {
                             x: last.pose.position.x as f32,
                             y: last.pose.position.y as f32,
                             z: last.pose.position.z as f32,
+                            roll: rotation.0 as f32,
+                            pitch: rotation.1 as f32,
+                            yaw: rotation.2 as f32
 
                         };
                         Response::Pose(response.into())
