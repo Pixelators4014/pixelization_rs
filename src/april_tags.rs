@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
-use crate::pose::{Point, Pose, EulerAngles, Quaternion};
+use crate::pose::{Point, Pose, EulerAngles};
 
 macro_rules! add_april_tag {
     ($x:literal, $y:literal, $z:literal, $angle:literal) => {
@@ -72,6 +72,15 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Pose> {
             if let Some(position) = position_option {
                 let april_tag_pose = position;
                 let relative_robot_pose = Pose::from(&detection.pose.pose.pose);
+                let inverse_robot_pose = Pose {
+                    position: relative_robot_pose.position.neg(),
+                    orientation: EulerAngles::from(relative_robot_pose.orientation).neg().into()
+                };
+                let absolute_robot_pose = Pose {
+                    position: inverse_robot_pose.position + april_tag_pose.position,
+                    orientation: (EulerAngles::from(april_tag_pose.orientation) + EulerAngles::from(inverse_robot_pose.orientation)).into()
+                };
+                return Some(absolute_robot_pose);
             }
         }
     }

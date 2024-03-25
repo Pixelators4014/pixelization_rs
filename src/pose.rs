@@ -1,3 +1,5 @@
+use std::ops::{Add, Neg};
+
 use nalgebra::Point3;
 
 pub type Point = Point3<f32>;
@@ -7,6 +9,16 @@ pub struct EulerAngles {
     pub roll: f32,
     pub pitch: f32,
     pub yaw: f32
+}
+
+impl EulerAngles {
+    pub fn new(roll: f32, pitch: f32, yaw: f32) -> Self {
+        Self { roll, pitch, yaw }
+    }
+
+    pub fn crop(&self) -> Self {
+        Self::new(self.roll % (2.0 * std::f32::consts::PI), self.pitch % (2.0 * std::f32::consts::PI), self.yaw % (2.0 * std::f32::consts::PI))
+    }
 }
 
 impl From<Quaternion> for EulerAngles {
@@ -24,6 +36,22 @@ impl From<Quaternion> for EulerAngles {
         let yaw = siny_cosp.atan2(cosy_cosp);
 
         EulerAngles { roll, pitch, yaw }
+    }
+}
+
+impl Add for EulerAngles {
+    type Output = EulerAngles;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        EulerAngles { roll: self.roll + rhs.roll, pitch: self.pitch + rhs.pitch, yaw: self.yaw + rhs.yaw }.crop()
+    }
+}
+
+impl Neg for EulerAngles {
+    type Output = EulerAngles;
+
+    fn neg(self) -> Self::Output {
+        EulerAngles { roll: self.roll + std::f32::consts::PI, pitch: self.pitch + std::f32::consts::PI, yaw: self.yaw + std::f32::consts::PI }.crop()
     }
 }
 
