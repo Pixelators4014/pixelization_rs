@@ -42,7 +42,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let localizer_client = Arc::clone(&network_node.client);
     let localizer_april_tags = Arc::clone(&network_node.april_tags);
 
-    tokio::task::spawn(async move {
+    let t = tokio::task::spawn(async move {
         run_server(server_path, server_client).await;
     });
     tokio::task::spawn(async move {
@@ -83,5 +83,6 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             println!("{:?}", e);
         }
     });
+    t.await; // TODO: await all tasks or have kill switch idk
     Ok(())
 }
