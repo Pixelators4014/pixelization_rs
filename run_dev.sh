@@ -3,7 +3,7 @@ DOCKER_ARGS = "-v /tmp/.X11-unix:/tmp/.X11-unix -v /home/alistair/.Xauthority:/h
 docker run -it --rm \
     --privileged \
     --network host \
-    $DOCKER_ARGS \
+    ${DOCKER_ARGS} \
     -v $HOME/workspaces/isaac_ros-dev:/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
