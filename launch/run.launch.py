@@ -95,19 +95,6 @@ def generate_launch_description():
                     ('visual_slam/imu', 'camera/imu')]
     )
 
-    isaac_container = ComposableNodeContainer(
-        package='rclcpp_components',
-        name='isaac_compenents_container',
-        namespace='',
-        executable='component_container_mt',
-        composable_node_descriptions=[
-            rectify_node,
-            apriltag_node,
-            visual_slam_node
-        ],
-        output='screen'
-    )
-
     comms_node = Node(
         name='pixelization',
         namespace='',
@@ -115,4 +102,19 @@ def generate_launch_description():
         executable='main',
     )
 
-    return launch.LaunchDescription([isaac_container, realsense_camera_node, comms_node])
+    isaac_container = ComposableNodeContainer(
+        package='rclcpp_components',
+        name='isaac_compenents_container',
+        namespace='',
+        executable='component_container_mt',
+        composable_node_descriptions=[
+            realsense_camera_node,
+            comms_node,
+            rectify_node,
+            apriltag_node,
+            visual_slam_node
+        ],
+        output='screen'
+    )
+
+    return launch.LaunchDescription([isaac_container])
