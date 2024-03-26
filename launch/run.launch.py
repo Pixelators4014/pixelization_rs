@@ -59,18 +59,6 @@ def generate_launch_description():
         namespace=''
     )
 
-    apriltag_container = ComposableNodeContainer(
-        package='rclcpp_components',
-        name='apriltag_container',
-        namespace='',
-        executable='component_container_mt',
-        composable_node_descriptions=[
-            rectify_node,
-            apriltag_node
-        ],
-        output='screen'
-    )
-
     visual_slam_node = ComposableNode(
         name='visual_slam_node',
         package='isaac_ros_visual_slam',
@@ -102,12 +90,14 @@ def generate_launch_description():
                     ('visual_slam/imu', 'camera/imu')]
     )
 
-    visual_slam_launch_container = ComposableNodeContainer(
-        name='visual_slam_launch_container',
-        namespace='',
+    isaac_container = ComposableNodeContainer(
         package='rclcpp_components',
-        executable='component_container',
+        name='isaac_compenents_container',
+        namespace='',
+        executable='component_container_mt',
         composable_node_descriptions=[
+            rectify_node,
+            apriltag_node,
             visual_slam_node
         ],
         output='screen'
@@ -120,4 +110,4 @@ def generate_launch_description():
         executable='main',
     )
 
-    return launch.LaunchDescription([apriltag_container, visual_slam_launch_container, realsense_camera_node, comms_node])
+    return launch.LaunchDescription([isaac_container, realsense_camera_node, comms_node])
