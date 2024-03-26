@@ -52,19 +52,6 @@ COPY . pixelization_rs
 WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
-COPY src/isaac_ros_common/scripts/build-librealsense.sh /opt/realsense/build-librealsense.sh
-COPY src/isaac_ros_common/scripts/install-realsense-dependencies.sh /opt/realsense/install-realsense-dependencies.sh
-
-RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && /opt/realsense/install-realsense-dependencies.sh
-RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh
-
-# Copy hotplug script which will get invoked whenever a devices plugged or un-plugged
-RUN mkdir -p /opt/realsense/
-COPY src/isaac_ros_common/scripts/hotplug-realsense.sh /opt/realsense/hotplug-realsense.sh
-RUN chmod +x /opt/realsense/hotplug-realsense.sh
-
-# Copy custom udev rules file
-COPY udev_rules/99-realsense-libusb-custom.rules /etc/udev/rules.d/99-realsense-libusb-custom.rules
 RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
 RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-install --packages-up-to pixelization_rs
 RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
