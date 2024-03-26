@@ -14,9 +14,9 @@ async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Ar
     server.run().await.unwrap();
 }
 
-async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
+async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<RwLock<Option<AprilTagDetectionArray>>>) {
     loop {
-        let data = ping_data.read().await;
+        let data = path_data.read().await;
         if let Some(path_option) = data.as_ref() {
             if let Some(path) = path_option.poses.last() {
                 println!("Node is Alive and Running: {path:?}");
@@ -24,9 +24,19 @@ async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
                 println!("VSLAM has not initialized yet")
             }
         } else {
-            println!("Node is Alive with No data");
+            println!("VSLAM not connected yet");
         }
         drop(data);
+        let data = april_tags_data.read().await;
+        if let Some(april_tags_option) = data.as_ref() {
+            if let Some(april_tags) = april_tags_option.detections.last() {
+                println!("Node is Alive and Running: {} april tags", april_tags.detections.len());
+            } else {
+                println!("No april tags detected yet");
+            }
+        } else {
+            println!("April Tags not connected yet");
+        }
         tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
     }
 }
@@ -38,7 +48,8 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
     let server_path = Arc::clone(&network_node.path);
     let server_client = Arc::clone(&network_node.client);
-    let ping_data = Arc::clone(&network_node.path);
+    let ping_path = Arc::clone(&network_node.path);
+    let ping_april_tags = Arc::clone(&network_node.april_tags);
     let localizer_path = Arc::clone(&network_node.path);
     let localizer_client = Arc::clone(&network_node.client);
     let localizer_april_tags = Arc::clone(&network_node.april_tags);
@@ -47,7 +58,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
         run_server(server_path, server_client).await;
     });
     tokio::task::spawn(async move {
-        run_ping(ping_data).await;
+        run_ping(ping_path, ping_april_tags).await;
     });
     tokio::task::spawn(async move {
         loop {
