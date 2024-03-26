@@ -32,7 +32,7 @@ impl NetworkNode {
         let april_tags = Arc::new(RwLock::new(None));
         let april_tags_cb = Arc::clone(&april_tags);
         let april_tags_subscription = node.create_subscription(
-            "tag_detections",
+            "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
                 // This subscription now owns the data_cb variable
