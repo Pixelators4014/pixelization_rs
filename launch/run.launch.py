@@ -58,7 +58,8 @@ def generate_launch_description():
         package='isaac_ros_apriltag',
         plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
         name='apriltag',
-        namespace=''
+        namespace='',
+        parameters=[{'max_tags': 16}]
     )
 
     visual_slam_node = ComposableNode(
