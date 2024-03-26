@@ -19,7 +19,7 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
         let data = path_data.read().await;
         if let Some(path_option) = data.as_ref() {
             if let Some(path) = path_option.poses.last() {
-                println!("Node is Alive and Running: {path:?}");
+                println!("VSLAM is running: {path:?}");
             } else {
                 println!("VSLAM has not initialized yet")
             }
@@ -29,7 +29,7 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
         drop(data);
         let data = april_tags_data.read().await;
         if let Some(april_tags) = data.as_ref() {
-            println!("Node is Alive and Running: {} april tags", april_tags.detections.len());
+            println!("April Tags is running: {} april tags", april_tags.detections.len());
         } else {
             println!("April Tags not connected yet");
         }
