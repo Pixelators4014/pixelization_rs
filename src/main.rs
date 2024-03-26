@@ -83,6 +83,6 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             println!("{:?}", e);
         }
     });
-    t.await; // TODO: await all tasks or have kill switch idk
+    t.await;
     Ok(())
 }

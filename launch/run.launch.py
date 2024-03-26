@@ -41,6 +41,35 @@ def generate_launch_description():
             'unite_imu_method': 2
         }]
     )
+    rectify_node = ComposableNode(
+        package='isaac_ros_image_proc',
+        plugin='nvidia::isaac_ros::image_proc::RectifyNode',
+        name='rectify',
+        namespace='',
+        parameters=[{
+            'output_width': 1920,
+            'output_height': 1080,
+        }]
+    )
+
+    apriltag_node = ComposableNode(
+        package='isaac_ros_apriltag',
+        plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
+        name='apriltag',
+        namespace=''
+    )
+
+    apriltag_container = ComposableNodeContainer(
+        package='rclcpp_components',
+        name='apriltag_container',
+        namespace='',
+        executable='component_container_mt',
+        composable_node_descriptions=[
+            rectify_node,
+            apriltag_node
+        ],
+        output='screen'
+    )
 
     visual_slam_node = ComposableNode(
         name='visual_slam_node',
@@ -91,4 +120,4 @@ def generate_launch_description():
         executable='main',
     )
 
-    return launch.LaunchDescription([visual_slam_launch_container, realsense_camera_node, comms_node])
+    return launch.LaunchDescription([apriltag_container, visual_slam_launch_container, realsense_camera_node, comms_node])
