@@ -33,6 +33,7 @@ async fn run_ping(ping_data: Arc<RwLock<Option<PathMsg>>>) {
 
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {
+    println!("Starting Pixelization Node");
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
     let server_path = Arc::clone(&network_node.path);
@@ -54,6 +55,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
                 let april_tags_pose = april_tags::localize(april_tags_unlocked);
                 if let Some(april_tags_pose) = april_tags_pose {
+                    println!("Using April Tags Pose: {april_tags_pose:?}");
                     // TODO: impl kalman filter
                     let final_pose = april_tags_pose;
                     let client = Arc::clone(&localizer_client);
@@ -83,6 +85,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             println!("{:?}", e);
         }
     });
+    println!("Pixelization Node Up; Main Loop Idling");
     t.await;
     Ok(())
 }
