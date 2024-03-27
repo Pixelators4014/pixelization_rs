@@ -20,14 +20,14 @@ struct Pose {
 
 impl Pose {
     fn from_bytes(bytes: &[u8]) -> Result<Self, std::array::TryFromSliceError> {
-        return Self {
+        Ok(Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
             y: f32::from_le_bytes(bytes[4..8].try_into()?),
             z: f32::from_le_bytes(bytes[8..12].try_into()?),
             roll: f32::from_le_bytes(bytes[12..16].try_into()?),
             pitch: f32::from_le_bytes(bytes[16..20].try_into()?),
             yaw: f32::from_le_bytes(bytes[20..24].try_into()?),
-        };
+        })
     }
 
     fn to_bytes(&self) -> [u8; 24] {
