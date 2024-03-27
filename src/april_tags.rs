@@ -19,7 +19,6 @@ macro_rules! add_april_tag {
     };
 }
 
-// TODO: use vec
 lazy_static! {
     static ref APRIL_TAG_LOCATIONS: Vec<Option<Isometry3<f32>>> = {
         let mut v = Vec::new();

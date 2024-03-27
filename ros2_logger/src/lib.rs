@@ -195,7 +195,7 @@ impl Log for Ros2Logger {
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
-            // TODO: TimeStamp
+            // TODO: Use ros2 clock from rclrs (rclrs::Clock)
             let timestamp = builtin_interfaces::msg::Time {
                 sec: time as i32,
                 nanosec: 0,
