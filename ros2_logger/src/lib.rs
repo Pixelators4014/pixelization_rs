@@ -209,11 +209,11 @@ impl Log for Ros2Logger {
                 Level::Debug => rcl_interfaces::msg::Log_Severity::DEBUG,
                 Level::Trace => rcl_interfaces::msg::Log_Severity::TRACE,
             };
-            log.msg = message.args().to_string();
+            log.msg = record.args().to_string();
             log.name = record.target().to_string();
             log.file = record.file().unwrap_or_default().to_string();
             log.line = record.line().unwrap_or_default() as u32;
-            publisher.publish(&log)?;
+            self.ros_out_publisher.publish(&log)?;
         }
     }
 
