@@ -188,7 +188,7 @@ impl Log for Ros2Logger {
                 ""
             };
 
-            let message = format!("{}{} [{}{}] {}", timestamp, level_string, target, thread, record.args());
+            let message = format!("[{target}{thread}] [{level_string}] [{timestamp}]: {}", record.args());
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
