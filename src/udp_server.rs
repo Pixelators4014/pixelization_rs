@@ -197,12 +197,12 @@ impl Server {
         bytes: &Vec<u8>,
     ) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
-        if let Some(request) = request {
-            Self::process_request(data, client, request)
-                .await
-                .to_bytes()
-        } else {
-            Response::Error("Invalid Request ".to_string()).to_bytes()
+        match request {
+            Ok(request) => Self::process_request(data, client, request).await.to_bytes(),
+            Err(e) => {
+                warn!("Invalid Request: {e}");
+                Response::Error("Invalid Request: {}".to_string()).to_bytes()
+            },
         }
     }
 
