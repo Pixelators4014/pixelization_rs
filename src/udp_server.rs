@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 
 use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 
-use log::info;
+use log::{debug, info, warn};
 
 struct Pose {
     x: f32,
@@ -19,14 +19,14 @@ struct Pose {
 }
 
 impl Pose {
-    fn from_bytes(bytes: &[u8]) -> Self {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, std::num::ParseFloatError> {
         return Self {
-            x: f32::from_le_bytes(bytes[0..4].try_into().unwrap()),
-            y: f32::from_le_bytes(bytes[4..8].try_into().unwrap()),
-            z: f32::from_le_bytes(bytes[8..12].try_into().unwrap()),
-            roll: f32::from_le_bytes(bytes[12..16].try_into().unwrap()),
-            pitch: f32::from_le_bytes(bytes[16..20].try_into().unwrap()),
-            yaw: f32::from_le_bytes(bytes[20..24].try_into().unwrap()),
+            x: f32::from_le_bytes(bytes[0..4].try_into()?),
+            y: f32::from_le_bytes(bytes[4..8].try_into()?),
+            z: f32::from_le_bytes(bytes[8..12].try_into()?),
+            roll: f32::from_le_bytes(bytes[12..16].try_into()?),
+            pitch: f32::from_le_bytes(bytes[16..20].try_into()?),
+            yaw: f32::from_le_bytes(bytes[20..24].try_into()?),
         };
     }
 
@@ -49,15 +49,15 @@ enum Request {
 }
 
 impl Request {
-    fn from_bytes(bytes: &[u8]) -> Option<Self> {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
         return if bytes[0] == 0 {
-            Some(Self::GetVslamPose)
+            Ok(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            Some(Self::SetVslamPose(Pose::from_bytes(&bytes[1..])))
+            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..])).map_err(|e| e.to_string())?)
         } else if bytes[0] == 2 {
-            Some(Self::GetDetections)
+            Ok(Self::GetDetections)
         } else {
-            None
+            Err(format!("Unknown request first byte: {}", bytes[0]))
         };
     }
 }
@@ -136,7 +136,7 @@ impl Server {
                                 last.pose.orientation.y,
                                 last.pose.orientation.z,
                             )))
-                            .euler_angles();
+                                .euler_angles();
                         let response = Pose {
                             x: last.pose.position.x as f32,
                             y: last.pose.position.y as f32,
@@ -180,6 +180,7 @@ impl Server {
                     // TODO: make sure this works
                     Response::Success
                 } else {
+                    warn!("Failed to set VSLAM pose: {service_request:?}");
                     Response::Error("Server Error: Failed to set VSLAM pose".to_string())
                 }
             }
@@ -201,7 +202,7 @@ impl Server {
                 .await
                 .to_bytes()
         } else {
-            Response::Error("Invalid Request (first byte not valid)".to_string()).to_bytes()
+            Response::Error("Invalid Request ".to_string()).to_bytes()
         }
     }
 
@@ -216,6 +217,7 @@ impl Server {
                 let mut buffer = [0u8; 512];
                 let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
                 if let Ok((_, src)) = result {
+                    info!("Request from {src:?}");
                     let packet = Packet {
                         buf: buffer.to_vec(),
                         addr: src,
@@ -230,7 +232,7 @@ impl Server {
                             Arc::clone(&inner_client),
                             &packet.buf,
                         )
-                        .await;
+                            .await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes,
@@ -243,6 +245,7 @@ impl Server {
 
         while let Some(packet) = rx.recv().await {
             // transfer response packet to the client.
+            debug!("Response to {addr:?}", addr = packet.addr);
             let _ = Arc::clone(&self.socket)
                 .send_to(&packet.buf, &packet.addr)
                 .await;
