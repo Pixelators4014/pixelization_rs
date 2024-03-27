@@ -12,7 +12,7 @@ pub mod util;
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
-    ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Trace).unwrap();
+    ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Info).unwrap();
     info!("Starting Pixelization Node");
     let server_network_node = Arc::clone(&network_node);
     let ping_network_node = Arc::clone(&network_node);
