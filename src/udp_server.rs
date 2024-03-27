@@ -117,7 +117,7 @@ impl Server {
         }
     }
 
-    async fn process_request(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, request: Request) -> Response {
+    async fn process_request(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, request: Request) -> Response {
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
@@ -171,10 +171,10 @@ impl Server {
         }
     }
 
-    pub async fn handle_bytes(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, milli_start: u32, bytes: &Vec<u8>) -> Vec<u8> {
+    pub async fn handle_bytes(data: Arc<RwLock<Option<PathMsg>>>, client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>, bytes: &Vec<u8>) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         if let Some(request) = request {
-            Self::process_request(data, client, milli_start, request).await.to_bytes()
+            Self::process_request(data, client, request).await.to_bytes()
         } else {
             Response::Error("Invalid Request (first byte not valid)".to_string()).to_bytes()
         }
@@ -200,7 +200,7 @@ impl Server {
                     let inner_data = Arc::clone(&task_data);
                     let inner_client = Arc::clone(&task_client);
                     tokio::spawn(async move {
-                        let new_bytes = Self::handle_bytes(Arc::clone(&inner_data), Arc::clone(&inner_client), task_milli_start, &packet.buf).await;
+                        let new_bytes = Self::handle_bytes(Arc::clone(&inner_data), Arc::clone(&inner_client), &packet.buf).await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes
