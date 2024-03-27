@@ -195,6 +195,11 @@ impl Log for Ros2Logger {
             let mut log = rcl_interfaces::msg::Log::default();
             // TODO: TimeStamp
             let time = SystemTime::now().duration_since(UNIX_EPOCH).as_secs();
+            let timestamp = builtin_interfaces::msg::Time {
+                sec: time as i32,
+                nanosec: 0
+            };
+            log.stamp = timestamp;
             log.level = match record.level() {
                 Level::Error => 40,
                 Level::Warn => 30,
