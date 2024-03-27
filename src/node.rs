@@ -78,7 +78,7 @@ impl NetworkNode {
             let data = self.path.read().await;
             if let Some(path_option) = data.as_ref() {
                 if let Some(path) = path_option.poses.last() {
-                    info!("VSLAM is running: {path:?}");
+                    debug!("VSLAM is running: {path:?}");
                 } else {
                     warn!("VSLAM has not initialized yet")
                 }
@@ -88,7 +88,7 @@ impl NetworkNode {
             drop(data);
             let data = self.april_tags.read().await;
             if let Some(april_tags) = data.as_ref() {
-                info!(
+                debug!(
                     "April Tags is running: {} april tags",
                     april_tags.detections.len()
                 );
