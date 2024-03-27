@@ -11,11 +11,6 @@ pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
 
-async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
-    let server = udp_server::Server::new(server_path, server_client).await;
-    server.run().await.unwrap();
-}
-
 async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<RwLock<Option<AprilTagDetectionArray>>>) {
     loop {
         let data = path_data.read().await;
@@ -87,7 +82,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let localizer_april_tags = Arc::clone(&network_node.april_tags);
 
     let t = tokio::task::spawn(async move {
-        run_server(server_path, server_client).await;
+        network_node.run().await;
     });
     tokio::task::spawn(async move {
         run_ping(ping_path, ping_april_tags).await;
