@@ -39,6 +39,38 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
     }
 }
 
+async fn run_localizer(_vslam_path: Arc<RwLock<Option<PathMsg>>>, localizer_april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>, localizer_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
+    loop {
+        let april_tags_unlocked_option = localizer_april_tags.read().await;
+        if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
+            let april_tags_pose = april_tags::localize(april_tags_unlocked);
+            if let Some(april_tags_pose) = april_tags_pose {
+                info!("Using April Tags Pose: {april_tags_pose:?}");
+                // TODO: impl kalman filter
+                let final_pose = april_tags_pose;
+                let client = Arc::clone(&localizer_client);
+                let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                    pose: geometry_msgs::msg::Pose {
+                        position: geometry_msgs::msg::Point {
+                            x: final_pose.translation.x as f64,
+                            y: final_pose.translation.y as f64,
+                            z: final_pose.translation.z as f64,
+                        },
+                        orientation: geometry_msgs::msg::Quaternion {
+                            w: final_pose.rotation.quaternion().coords[3] as f64,
+                            x: final_pose.rotation.quaternion().coords[0] as f64,
+                            y: final_pose.rotation.quaternion().coords[1] as f64,
+                            z: final_pose.rotation.quaternion().coords[2] as f64,
+                        }
+                    }
+                };
+                let response = client.call_async(&service_request).await.unwrap();
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
@@ -61,35 +93,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
         run_ping(ping_path, ping_april_tags).await;
     });
     tokio::task::spawn(async move {
-        loop {
-            let april_tags_unlocked_option = localizer_april_tags.read().await;
-            if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
-                let april_tags_pose = april_tags::localize(april_tags_unlocked);
-                if let Some(april_tags_pose) = april_tags_pose {
-                    info!("Using April Tags Pose: {april_tags_pose:?}");
-                    // TODO: impl kalman filter
-                    let final_pose = april_tags_pose;
-                    let client = Arc::clone(&localizer_client);
-                    let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
-                        pose: geometry_msgs::msg::Pose {
-                            position: geometry_msgs::msg::Point {
-                                x: final_pose.translation.x as f64,
-                                y: final_pose.translation.y as f64,
-                                z: final_pose.translation.z as f64,
-                            },
-                            orientation: geometry_msgs::msg::Quaternion {
-                                w: final_pose.rotation.quaternion().coords[3] as f64,
-                                x: final_pose.rotation.quaternion().coords[0] as f64,
-                                y: final_pose.rotation.quaternion().coords[1] as f64,
-                                z: final_pose.rotation.quaternion().coords[2] as f64,
-                            }
-                        }
-                    };
-                    let response = client.call_async(&service_request).await.unwrap();
-                }
-            }
-            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        }
+        run_localizer(localizer_path, localizer_april_tags, localizer_client).await;
     });
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
