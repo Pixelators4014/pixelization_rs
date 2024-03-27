@@ -189,7 +189,7 @@ impl Server {
     }
 
     pub async fn run(&self) -> io::Result<()> {
-        println!("Listening on {}", self.socket.local_addr()?);
+        info!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);
         let task_socket = Arc::clone(&self.socket);
         let task_data = Arc::clone(&self.data);

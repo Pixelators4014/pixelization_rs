@@ -43,7 +43,7 @@ impl NetworkNode {
         let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>("visual_slam/set_odometry_pose")?;
         while !client.service_is_ready()? {
             std::thread::sleep(std::time::Duration::from_millis(10));
-            println!("Waiting for service to initialize ...");
+            info!("Waiting for service to initialize ...");
         }
         Ok(Self {
             node,

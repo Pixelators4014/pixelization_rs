@@ -19,19 +19,19 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
         let data = path_data.read().await;
         if let Some(path_option) = data.as_ref() {
             if let Some(path) = path_option.poses.last() {
-                eprintln!("VSLAM is running: {path:?}");
+                info!("VSLAM is running: {path:?}");
             } else {
-                eprintln!("VSLAM has not initialized yet")
+                warn!("VSLAM has not initialized yet")
             }
         } else {
-            eprintln!("VSLAM not connected yet");
+            warn!("VSLAM not connected yet");
         }
         drop(data);
         let data = april_tags_data.read().await;
         if let Some(april_tags) = data.as_ref() {
-            eprintln!("April Tags is running: {} april tags", april_tags.detections.len());
+            info!("April Tags is running: {} april tags", april_tags.detections.len());
         } else {
-            eprintln!("April Tags not connected yet");
+            warn!("April Tags not connected yet");
         }
         tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
     }
@@ -39,7 +39,7 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
 
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {
-    eprintln!("Starting Pixelization Node");
+    info!("Starting Pixelization Node");
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
     let server_path = Arc::clone(&network_node.path);
@@ -62,7 +62,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
             if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
                 let april_tags_pose = april_tags::localize(april_tags_unlocked);
                 if let Some(april_tags_pose) = april_tags_pose {
-                    eprintln!("Using April Tags Pose: {april_tags_pose:?}");
+                    info!("Using April Tags Pose: {april_tags_pose:?}");
                     // TODO: impl kalman filter
                     let final_pose = april_tags_pose;
                     let client = Arc::clone(&localizer_client);
@@ -89,10 +89,10 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     });
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
-            eprintln!("{:?}", e);
+            error!("{:?}", e);
         }
     });
-    eprintln!("Pixelization Node Up; Main Loop Idling");
+    info!("Pixelization Node Up; Main Loop Idling");
     t.await;
     Ok(())
 }
