@@ -97,15 +97,6 @@ impl From<Pose> for Response {
     }
 }
 
-fn now_millis_u31() -> u32 {
-    let time = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis();
-    let modded = time % 2_u128.pow(31);
-    modded as u32
-}
-
 struct Packet {
     buf: Vec<u8>,
     addr: std::net::SocketAddr,
