@@ -61,5 +61,8 @@ impl NetworkNode {
         Ok(())
     }
 
-
+    pub async fn run_server(self: Arc<Self>) {
+        let server = udp_server::Server::new(self.path, self.client).await;
+        server.run().await.unwrap();
+    }
 }
