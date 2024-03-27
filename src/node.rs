@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use tokio::sync::RwLock;
 use log::{info, warn};
+
+use tokio::sync::RwLock;
 
 use nav_msgs::msg::Path as PathMsg;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
