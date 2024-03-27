@@ -175,18 +175,10 @@ impl Log for Ros2Logger {
                 format!("{}", record.level().to_string())
             };
 
-            let target = if !record.target().is_empty() {
+            let _target = if !record.target().is_empty() {
                 record.target()
             } else {
                 record.module_path().unwrap_or_default()
-            };
-
-            let thread = {
-                ""
-            };
-
-            let timestamp = {
-                ""
             };
 
             let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
