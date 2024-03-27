@@ -19,7 +19,7 @@ struct Pose {
 }
 
 impl Pose {
-    fn from_bytes(bytes: &[u8]) -> Result<Self, std::num::ParseFloatError> {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, std::array::TryFromSliceError> {
         return Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
             y: f32::from_le_bytes(bytes[4..8].try_into()?),
