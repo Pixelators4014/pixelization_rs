@@ -171,7 +171,7 @@ impl Server {
                     }
                 };
                 let response = client.call_async(&service_request).await.unwrap();
-                if response.success {
+                if response.success { // TODO: make sure this works
                     Response::Success
                 } else {
                     Response::Error("Server Error: Failed to set VSLAM pose".to_string())
