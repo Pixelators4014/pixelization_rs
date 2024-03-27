@@ -175,13 +175,20 @@ impl Server {
                             },
                         },
                     };
-                let response = client.call_async(&service_request).await.unwrap();
-                if response.success {
-                    // TODO: make sure this works
-                    Response::Success
-                } else {
-                    warn!("Failed to set VSLAM pose: {service_request:?}");
-                    Response::Error("Server Error: Failed to set VSLAM pose".to_string())
+                let response_res = client.call_async(&service_request).await;
+                match response_res {
+                    Ok(response) => {
+                        if response.success {
+                            // TODO: make sure this works
+                            Response::Success
+                        } else {
+                            warn!("Failed to set VSLAM pose: {service_request:?}");
+                            Response::Error("Server Error: Failed to set VSLAM pose".to_string())
+                        }
+                    },
+                    Err(e) => {
+                        warn!("Failed to set VSLAM pose: {service_request:?}");
+                    }
                 }
             }
             Request::GetDetections => {
