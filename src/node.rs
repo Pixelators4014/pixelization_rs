@@ -8,7 +8,6 @@ use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use nav_msgs::msg::Path as PathMsg;
 
 use crate::april_tags;
-use crate::util;
 
 pub struct NetworkNode {
     pub node: Arc<rclrs::Node>,

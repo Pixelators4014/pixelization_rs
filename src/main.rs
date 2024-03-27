@@ -1,9 +1,7 @@
-use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
-use nav_msgs::msg::Path as PathMsg;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use log::{error, info, warn};
+use log::{error, info};
 
 mod april_tags;
 mod kalman_filter;
