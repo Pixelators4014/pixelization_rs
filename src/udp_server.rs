@@ -53,7 +53,7 @@ impl Request {
         return if bytes[0] == 0 {
             Ok(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..])).map_err(|e| e.to_string())?)
+            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..]).map_err(|e| e.to_string())?))
         } else if bytes[0] == 2 {
             Ok(Self::GetDetections)
         } else {
