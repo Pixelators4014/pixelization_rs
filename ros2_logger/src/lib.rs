@@ -165,20 +165,10 @@ impl Ros2Logger {
 
 impl Log for Ros2Logger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        &metadata.level().to_level_filter()
-            <= self
-            .module_levels
-            .iter()
-            /* At this point the Vec is already sorted so that we can simply take
-                 * the first match
-                 */
-            .find(|(name, _level)| metadata.target().starts_with(name))
-            .map(|(_name, level)| level)
-            .unwrap_or(&self.default_level)
+        true
     }
 
     fn log(&self, record: &Record) {
-        println!("logging");
         if self.enabled(record.metadata()) {
             let level_string = {
                 format!("{:<5}", record.level().to_string())
