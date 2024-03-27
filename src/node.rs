@@ -66,7 +66,7 @@ impl NetworkNode {
         server.run().await.unwrap();
     }
 
-    async fn run_ping(&self) {
+    pub async fn run_ping(&self) {
         loop {
             let data = self.path.read().await;
             if let Some(path_option) = data.as_ref() {
@@ -89,7 +89,7 @@ impl NetworkNode {
         }
     }
 
-    async fn run_localizer(&self) {
+    pub async fn run_localizer(&self) {
         loop {
             let april_tags_unlocked_option = self.april_tags.read().await;
             if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
