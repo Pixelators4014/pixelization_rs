@@ -88,7 +88,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
                     let response = client.call_async(&service_request).await.unwrap();
                 }
             }
-            std::thread::sleep(std::time::Duration::from_millis(50));
+            tokio::time::sleep(std::time::Duration::from_millis(50));
         }
     });
     std::thread::spawn(move || {
