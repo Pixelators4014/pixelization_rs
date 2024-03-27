@@ -43,7 +43,6 @@ async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
-    println!("Setting up ROS2 Logger");
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Trace).unwrap();
     info!("Starting Pixelization Node");
     let server_path = Arc::clone(&network_node.path);

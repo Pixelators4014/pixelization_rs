@@ -158,7 +158,6 @@ impl Ros2Logger {
     /// 'Init' the actual logger and instantiate it,
     /// this method MUST be called in order for the logger to be effective.
     pub fn init(self) -> Result<(), SetLoggerError> {
-        println!("Initializing logger with level {:?}", self.max_level());
         log::set_max_level(self.max_level());
         log::set_boxed_logger(Box::new(self))
     }
