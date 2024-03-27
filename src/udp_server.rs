@@ -122,7 +122,6 @@ impl Server {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
-                        let now = now_millis_u31();
                         let rotation = Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(last.pose.orientation.w, last.pose.orientation.x, last.pose.orientation.y, last.pose.orientation.z))).euler_angles();
                         let response = Pose {
                             x: last.pose.position.x as f32,
