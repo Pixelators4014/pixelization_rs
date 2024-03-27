@@ -61,8 +61,8 @@ impl NetworkNode {
         Ok(())
     }
 
-    pub async fn run_server(self: Arc<Self>) {
-        let server = crate::udp_server::Server::new(Arc::clone(self.path), Arc::clone(self.client)).await;
+    pub async fn run_server(&self) {
+        let server = crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.client)).await;
         server.run().await.unwrap();
     }
 }
