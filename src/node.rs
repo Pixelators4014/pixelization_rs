@@ -53,9 +53,9 @@ impl NetworkNode {
         })
     }
 
-    pub fn init(&self) -> Result<(), rclrs::RclrsError> {
+    pub async fn init(&self) -> Result<(), rclrs::RclrsError> {
         while !self.client.service_is_ready()? {
-            std::thread::sleep(std::time::Duration::from_millis(10));
+            tokio::time::sleep(std::time::Duration::from_millis(10));
             info!("Waiting for service to initialize ...");
         }
         Ok(())
