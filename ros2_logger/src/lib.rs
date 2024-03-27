@@ -213,7 +213,7 @@ impl Log for Ros2Logger {
             log.name = record.target().to_string();
             log.file = record.file().unwrap_or_default().to_string();
             log.line = record.line().unwrap_or_default() as u32;
-            self.ros_out_publisher.publish(&log)?;
+            self.ros_out_publisher.publish(&log); // TODO: eprintln if this doesn't work
         }
     }
 
