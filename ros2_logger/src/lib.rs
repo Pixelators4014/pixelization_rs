@@ -191,7 +191,7 @@ impl Log for Ros2Logger {
 
             let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
-            let message = format!("[{target}{thread}] [{level_string}] [{time}]: {}", record.args());
+            let message = format!("[{level_string}] [{time}]: {}", record.args());
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
