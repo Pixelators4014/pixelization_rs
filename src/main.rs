@@ -73,8 +73,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Trace).unwrap();
     info!("Starting Pixelization Node");
     network_node.init().await?; // TODO: join instead
-    let server_path = Arc::clone(&network_node.path);
-    let server_client = Arc::clone(&network_node.client);
+    let server_network_node = Arc::clone(&network_node);
     let ping_path = Arc::clone(&network_node.path);
     let ping_april_tags = Arc::clone(&network_node.april_tags);
     let localizer_path = Arc::clone(&network_node.path);
@@ -82,7 +81,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let localizer_april_tags = Arc::clone(&network_node.april_tags);
 
     let t = tokio::task::spawn(async move {
-        network_node.run_server().await;
+        server_network_node.run_server().await;
     });
     tokio::task::spawn(async move {
         run_ping(ping_path, ping_april_tags).await;
