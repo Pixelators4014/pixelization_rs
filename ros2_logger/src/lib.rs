@@ -163,13 +163,6 @@ impl Ros2Logger {
     }
 }
 
-impl Default for Ros2Logger {
-    /// See [this](struct.Ros2Logger.html#method.new)
-    fn default() -> Self {
-        Ros2Logger::new()
-    }
-}
-
 impl Log for Ros2Logger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         &metadata.level().to_level_filter()
@@ -217,21 +210,21 @@ impl Log for Ros2Logger {
 ///
 /// Log messages will not be filtered.
 /// The `RUST_LOG` environment variable is not used.
-pub fn init() -> Result<(), SetLoggerError> {
-    Ros2Logger::new().init()
+pub fn init(node: std::sync::Arc<rclrs::Node>) -> Result<(), SetLoggerError> {
+    Ros2Logger::new(node).init()
 }
 
 /// Initialise the logger with the `RUST_LOG` environment variable.
 ///
 /// Log messages will be filtered based on the `RUST_LOG` environment variable.
-pub fn init_with_env() -> Result<(), SetLoggerError> {
-    Ros2Logger::new().env().init()
+pub fn init_with_env(node: std::sync::Arc<rclrs::Node>) -> Result<(), SetLoggerError> {
+    Ros2Logger::new(node).env().init()
 }
 
 /// Initialise the logger with a specific log level.
 ///
 /// Log messages below the given [`Level`] will be filtered.
 /// The `RUST_LOG` environment variable is not used.
-pub fn init_with_level(level: Level) -> Result<(), SetLoggerError> {
-    Ros2Logger::new().with_level(level.to_level_filter()).init()
+pub fn init_with_level(node: std::sync::Arc<rclrs::Node>, level: Level) -> Result<(), SetLoggerError> {
+    Ros2Logger::new(node).with_level(level.to_level_filter()).init()
 }
