@@ -186,7 +186,6 @@ impl Server {
         let task_socket = Arc::clone(&self.socket);
         let task_data = Arc::clone(&self.data);
         let task_client = Arc::clone(&self.client);
-        let task_milli_start = self.milli_start;
         tokio::spawn(async move {
             loop {
                 let mut buffer = [0u8; 512];
