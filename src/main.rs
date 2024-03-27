@@ -11,60 +11,6 @@ pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
 
-async fn run_ping(path_data: Arc<RwLock<Option<PathMsg>>>, april_tags_data: Arc<RwLock<Option<AprilTagDetectionArray>>>) {
-    loop {
-        let data = path_data.read().await;
-        if let Some(path_option) = data.as_ref() {
-            if let Some(path) = path_option.poses.last() {
-                info!("VSLAM is running: {path:?}");
-            } else {
-                warn!("VSLAM has not initialized yet")
-            }
-        } else {
-            warn!("VSLAM not connected yet");
-        }
-        drop(data);
-        let data = april_tags_data.read().await;
-        if let Some(april_tags) = data.as_ref() {
-            info!("April Tags is running: {} april tags", april_tags.detections.len());
-        } else {
-            warn!("April Tags not connected yet");
-        }
-        tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-    }
-}
-
-async fn run_localizer(_vslam_path: Arc<RwLock<Option<PathMsg>>>, localizer_april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>, localizer_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {
-    loop {
-        let april_tags_unlocked_option = localizer_april_tags.read().await;
-        if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
-            let april_tags_pose = april_tags::localize(april_tags_unlocked);
-            if let Some(april_tags_pose) = april_tags_pose {
-                info!("Using April Tags Pose: {april_tags_pose:?}");
-                // TODO: impl kalman filter
-                let final_pose = april_tags_pose;
-                let client = Arc::clone(&localizer_client);
-                let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
-                    pose: geometry_msgs::msg::Pose {
-                        position: geometry_msgs::msg::Point {
-                            x: final_pose.translation.x as f64,
-                            y: final_pose.translation.y as f64,
-                            z: final_pose.translation.z as f64,
-                        },
-                        orientation: geometry_msgs::msg::Quaternion {
-                            w: final_pose.rotation.quaternion().coords[3] as f64,
-                            x: final_pose.rotation.quaternion().coords[0] as f64,
-                            y: final_pose.rotation.quaternion().coords[1] as f64,
-                            z: final_pose.rotation.quaternion().coords[2] as f64,
-                        }
-                    }
-                };
-                let response = client.call_async(&service_request).await.unwrap();
-            }
-        }
-        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {
@@ -74,20 +20,17 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     info!("Starting Pixelization Node");
     network_node.init().await?; // TODO: join instead
     let server_network_node = Arc::clone(&network_node);
-    let ping_path = Arc::clone(&network_node.path);
-    let ping_april_tags = Arc::clone(&network_node.april_tags);
-    let localizer_path = Arc::clone(&network_node.path);
-    let localizer_client = Arc::clone(&network_node.client);
-    let localizer_april_tags = Arc::clone(&network_node.april_tags);
+    let ping_network_node = Arc::clone(&network_node);
+    let localizer_network_node = Arc::clone(&network_node);
 
     let t = tokio::task::spawn(async move {
         server_network_node.run_server().await;
     });
     tokio::task::spawn(async move {
-        run_ping(ping_path, ping_april_tags).await;
+        ping_network_node.run_ping().await;
     });
     tokio::task::spawn(async move {
-        run_localizer(localizer_path, localizer_april_tags, localizer_client).await;
+        localizer_network_node.run_localizer().await;
     });
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {

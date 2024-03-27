@@ -65,4 +65,59 @@ impl NetworkNode {
         let server = crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.client)).await;
         server.run().await.unwrap();
     }
+
+    async fn run_ping(&self) {
+        loop {
+            let data = self.path.read().await;
+            if let Some(path_option) = data.as_ref() {
+                if let Some(path) = path_option.poses.last() {
+                    info!("VSLAM is running: {path:?}");
+                } else {
+                    warn!("VSLAM has not initialized yet")
+                }
+            } else {
+                warn!("VSLAM not connected yet");
+            }
+            drop(data);
+            let data = self.april_tags.read().await;
+            if let Some(april_tags) = data.as_ref() {
+                info!("April Tags is running: {} april tags", april_tags.detections.len());
+            } else {
+                warn!("April Tags not connected yet");
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+        }
+    }
+
+    async fn run_localizer(&self) {
+        loop {
+            let april_tags_unlocked_option = self.april_tags.read().await;
+            if let Some(april_tags_unlocked) = april_tags_unlocked_option.as_ref() {
+                let april_tags_pose = april_tags::localize(april_tags_unlocked);
+                if let Some(april_tags_pose) = april_tags_pose {
+                    info!("Using April Tags Pose: {april_tags_pose:?}");
+                    // TODO: impl kalman filter
+                    let final_pose = april_tags_pose;
+                    let client = Arc::clone(&self.client);
+                    let service_request = isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                        pose: geometry_msgs::msg::Pose {
+                            position: geometry_msgs::msg::Point {
+                                x: final_pose.translation.x as f64,
+                                y: final_pose.translation.y as f64,
+                                z: final_pose.translation.z as f64,
+                            },
+                            orientation: geometry_msgs::msg::Quaternion {
+                                w: final_pose.rotation.quaternion().coords[3] as f64,
+                                x: final_pose.rotation.quaternion().coords[0] as f64,
+                                y: final_pose.rotation.quaternion().coords[1] as f64,
+                                z: final_pose.rotation.quaternion().coords[2] as f64,
+                            }
+                        }
+                    };
+                    let response = client.call_async(&service_request).await.unwrap();
+                }
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
+    }
 }
