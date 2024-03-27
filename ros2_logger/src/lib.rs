@@ -46,7 +46,7 @@ pub struct Ros2Logger {
     /// This must be sorted from most-specific to least-specific, so that [`enabled`](#method.enabled) can scan the
     /// vector for the first match to give us the desired log level for a module.
     module_levels: Vec<(String, LevelFilter)>,
-    // ros_out_publisher: std::sync::Arc<rclrs::Publisher<std_msgs::msg::String>>,
+    ros_out_publisher: std::sync::Arc<rclrs::Publisher<rcl_interfaces::msg::Log>>,
 }
 
 impl Ros2Logger {
@@ -64,11 +64,11 @@ impl Ros2Logger {
     /// [`init`]: #method.init
     #[must_use = "You must call init() to begin logging"]
     pub fn new(node: std::sync::Arc<rclrs::Node>) -> Ros2Logger {
-        // let publisher = node.create_publisher::<std_msgs::msg::String>("/ros_out", rclrs::QOS_PROFILE_DEFAULT).unwrap();
+        let publisher = node.create_publisher::<rcl_interfaces::msg::Log>("/ros_out", rclrs::QOS_PROFILE_DEFAULT).unwrap();
         Ros2Logger {
             default_level: LevelFilter::Trace,
             module_levels: Vec::new(),
-            // ros_out_publisher: publisher,
+            ros_out_publisher: publisher,
         }
     }
 
@@ -200,6 +200,20 @@ impl Log for Ros2Logger {
             let message = format!("{}{} [{}{}] {}", timestamp, level_string, target, thread, record.args());
 
             eprintln!("{}", message);
+            let mut log = rcl_interfaces::msg::Log::default();
+            // TODO: TimeStamp
+            log.level = match record.level() {
+                Level::Error => rcl_interfaces::msg::Log_Severity::ERROR,
+                Level::Warn => rcl_interfaces::msg::Log_Severity::WARN,
+                Level::Info => rcl_interfaces::msg::Log_Severity::INFO,
+                Level::Debug => rcl_interfaces::msg::Log_Severity::DEBUG,
+                Level::Trace => rcl_interfaces::msg::Log_Severity::TRACE,
+            };
+            log.msg = message.args().to_string();
+            log.name = record.target().to_string();
+            log.file = record.file().unwrap_or_default().to_string();
+            log.line = record.line().unwrap_or_default() as u32;
+            publisher.publish(&log)?;
         }
     }
 
