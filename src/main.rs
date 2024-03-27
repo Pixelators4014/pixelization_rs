@@ -82,7 +82,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let localizer_april_tags = Arc::clone(&network_node.april_tags);
 
     let t = tokio::task::spawn(async move {
-        network_node.run().await;
+        network_node.run_server().await;
     });
     tokio::task::spawn(async move {
         run_ping(ping_path, ping_april_tags).await;
