@@ -3,6 +3,8 @@ use tokio::sync::RwLock;
 use nav_msgs::msg::Path as PathMsg;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
+use log::info;
+
 pub struct NetworkNode {
     pub node: Arc<rclrs::Node>,
     #[allow(dead_code)]
