@@ -8,7 +8,7 @@ use log::{info, warn, error};
 mod april_tags;
 mod kalman_filter;
 pub(crate) mod node;
-mod udp_server;
+pub(crate) mod udp_server;
 pub mod util;
 
 async fn run_server(server_path: Arc<RwLock<Option<PathMsg>>>, server_client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>) {

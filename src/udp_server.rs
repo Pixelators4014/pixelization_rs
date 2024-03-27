@@ -115,7 +115,6 @@ pub struct Server {
     data: Arc<RwLock<Option<PathMsg>>>,
     client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     socket: Arc<UdpSocket>,
-    milli_start: u32, // TODO: Fix
 }
 
 impl Server {
@@ -124,7 +123,6 @@ impl Server {
             data,
             client,
             socket: Arc::new(UdpSocket::bind("127.0.0.1:8080").await.unwrap()),
-            milli_start: now_millis_u31(),
         }
     }
 
@@ -134,7 +132,6 @@ impl Server {
                 if let Some(msg) = data.read().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
                         let now = now_millis_u31();
-                        let header = (now - milli_start) as u32; // TODO: rework into return system
                         let rotation = Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(last.pose.orientation.w, last.pose.orientation.x, last.pose.orientation.y, last.pose.orientation.z))).euler_angles();
                         let response = Pose {
                             x: last.pose.position.x as f32,
@@ -230,5 +227,9 @@ impl Server {
             let _ = Arc::clone(&self.socket).send_to(&packet.buf, &packet.addr).await;
         }
         Ok(())
+    }
+    pub async fn run_server(self: Arc<Self>) {
+        let server = udp_server::Server::new(self.path, self.client).await;
+        server.run().await.unwrap();
     }
 }
