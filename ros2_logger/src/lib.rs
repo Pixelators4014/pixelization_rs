@@ -30,6 +30,7 @@
 
 use log::{Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::str::FromStr;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Implements [`Log`] and a set of simple builder methods for configuration.
 ///
@@ -193,6 +194,7 @@ impl Log for Ros2Logger {
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
             // TODO: TimeStamp
+            let time = SystemTime::now().duration_since(UNIX_EPOCH).as_secs();
             log.level = match record.level() {
                 Level::Error => 40,
                 Level::Warn => 30,

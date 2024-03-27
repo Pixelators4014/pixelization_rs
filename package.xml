@@ -9,25 +9,18 @@
     <maintainer email="arihant2math@gmail.com">Ashwin Naren</maintainer>
     <license>MIT License</license>
 
-    <build_depend>rclrs</build_depend>
-    <build_depend>rcl_interfaces</build_depend>
-    <build_depend>rosidl_runtime_rs</build_depend>
+    <build_depend>builtin_interfaces</build_depend>
     <build_depend>std_msgs</build_depend>
+    <build_depend>rcl_interfaces</build_depend>
     <build_depend>nav_msgs</build_depend>
     <build_depend>vision_msgs</build_depend>
     <build_depend>action_msgs</build_depend>
     <build_depend>isaac_ros_apriltag_interfaces</build_depend>
     <build_depend>isaac_ros_visual_slam_interfaces</build_depend>
 
-    <exec_depend>rclrs</exec_depend>
-    <exec_depend>rosidl_runtime_rs</exec_depend>
-    <exec_depend>std_msgs</exec_depend>
-    <exec_depend>action_msgs</exec_depend>
-    <exec_depend>nav_msgs</exec_depend>
-    <exec_depend>vision_msgs</exec_depend>
-    <exec_depend>isaac_ros_apriltag_interfaces</exec_depend>
-    <exec_depend>isaac_ros_visual_slam_interfaces</exec_depend>
-    <exec_depend>realsense2_camera</exec_depend>
+    <depend>rclrs</depend>
+    <depend>rosidl_runtime_rs</depend>
+    <depend>realsense2_camera</depend>
 
     <export>
         <build_type>ament_cargo</build_type>

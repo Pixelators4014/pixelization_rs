@@ -14,5 +14,8 @@ version = "0.4"
 [dependencies.rosidl_runtime_rs]
 version = "0.4"
 
+[dependencies.builtin_interfaces]
+version = "*"
+
 [dependencies.rcl_interfaces]
 version = "*"
