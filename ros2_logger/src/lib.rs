@@ -172,7 +172,7 @@ impl Log for Ros2Logger {
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             let level_string = {
-                format!("{:<5}", record.level().to_string())
+                format!("{}", record.level().to_string())
             };
 
             let target = if !record.target().is_empty() {
