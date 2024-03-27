@@ -101,6 +101,6 @@ async fn main() -> Result<(), rclrs::RclrsError> {
         }
     });
     info!("Pixelization Node Up; Main Loop Idling");
-    t.await;
+    let _ = t.await;
     Ok(())
 }
