@@ -171,8 +171,11 @@ impl Server {
                     }
                 };
                 let response = client.call_async(&service_request).await.unwrap();
-                // TODO: Better handling of service error or rclrs error
-                Response::Success
+                if response.success {
+                    Response::Success
+                } else {
+                    Response::Error("Server Error: Failed to set VSLAM pose".to_string())
+                }
             }
             Request::GetDetections => {
                 // TODO: Fix

@@ -29,7 +29,7 @@
 //! ```
 
 use log::{Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 /// Implements [`Log`] and a set of simple builder methods for configuration.
 ///
@@ -164,7 +164,7 @@ impl Ros2Logger {
 }
 
 impl Log for Ros2Logger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
         true
     }
 

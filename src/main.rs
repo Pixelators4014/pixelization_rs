@@ -77,7 +77,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Trace).unwrap();
     info!("Starting Pixelization Node");
-    network_node.init().await; // TODO: join instead
+    network_node.init().await?; // TODO: join instead
     let server_path = Arc::clone(&network_node.path);
     let server_client = Arc::clone(&network_node.client);
     let ping_path = Arc::clone(&network_node.path);
