@@ -203,7 +203,7 @@ impl Log for Ros2Logger {
             let mut log = rcl_interfaces::msg::Log::default();
             // TODO: TimeStamp
             log.level = match record.level() {
-                Level::Error => rcl_interfaces::msg::Log_Severity::ERROR,
+                Level::Error => rcl_interfaces::msg::Log::Severity::ERROR,
                 Level::Warn => rcl_interfaces::msg::Log_Severity::WARN,
                 Level::Info => rcl_interfaces::msg::Log_Severity::INFO,
                 Level::Debug => rcl_interfaces::msg::Log_Severity::DEBUG,
