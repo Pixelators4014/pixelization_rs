@@ -189,12 +189,13 @@ impl Log for Ros2Logger {
                 ""
             };
 
-            let message = format!("[{target}{thread}] [{level_string}] [{timestamp}]: {}", record.args());
+            let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+            let message = format!("[{target}{thread}] [{level_string}] [{time}]: {}", record.args());
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
             // TODO: TimeStamp
-            let time = SystemTime::now().duration_since(UNIX_EPOCH).as_secs();
             let timestamp = builtin_interfaces::msg::Time {
                 sec: time as i32,
                 nanosec: 0
