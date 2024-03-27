@@ -1,5 +1,3 @@
-use std::ops::Neg;
-
 use lazy_static::lazy_static;
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;

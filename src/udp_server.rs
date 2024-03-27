@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 
 use nalgebra::{Rotation3, UnitQuaternion, Quaternion};
 
-use log::{info, warn, error};
+use log::info;
 
 struct Pose {
     x: f32,
