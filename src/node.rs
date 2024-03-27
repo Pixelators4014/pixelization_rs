@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use log::{info, warn};
+use log::{debug, info, warn, error};
 
 use tokio::sync::RwLock;
 
@@ -126,6 +126,11 @@ impl NetworkNode {
                             },
                         };
                     let response = client.call_async(&service_request).await.unwrap();
+                    if response.success {
+                        debug!("Set Odometry Pose: {service_request:?}");
+                    } else {
+                        error!("Failed to set Odometry Pose: {service_request:?}");
+                    }
                 }
             }
             tokio::time::sleep(std::time::Duration::from_millis(50)).await;
