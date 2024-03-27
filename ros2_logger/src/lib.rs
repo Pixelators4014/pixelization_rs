@@ -65,7 +65,9 @@ impl Ros2Logger {
     /// [`init`]: #method.init
     #[must_use = "You must call init() to begin logging"]
     pub fn new(node: std::sync::Arc<rclrs::Node>) -> Ros2Logger {
-        let publisher = node.create_publisher::<rcl_interfaces::msg::Log>("/ros_out", rclrs::QOS_PROFILE_DEFAULT).unwrap();
+        let publisher = node
+            .create_publisher::<rcl_interfaces::msg::Log>("/ros_out", rclrs::QOS_PROFILE_DEFAULT)
+            .unwrap();
         Ros2Logger {
             default_level: LevelFilter::Trace,
             module_levels: Vec::new(),
@@ -150,7 +152,12 @@ impl Ros2Logger {
 
     /// Configure the logger
     pub fn max_level(&self) -> LevelFilter {
-        let max_level = self.module_levels.iter().map(|(_name, level)| level).copied().max();
+        let max_level = self
+            .module_levels
+            .iter()
+            .map(|(_name, level)| level)
+            .copied()
+            .max();
         max_level
             .map(|lvl| lvl.max(self.default_level))
             .unwrap_or(self.default_level)
@@ -171,9 +178,7 @@ impl Log for Ros2Logger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let level_string = {
-                format!("{}", record.level().to_string())
-            };
+            let level_string = { format!("{}", record.level().to_string()) };
 
             let _target = if !record.target().is_empty() {
                 record.target()
@@ -181,7 +186,10 @@ impl Log for Ros2Logger {
                 record.module_path().unwrap_or_default()
             };
 
-            let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+            let time = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
 
             let message = format!("[{level_string}] [{time}]: {}", record.args());
 
@@ -190,7 +198,7 @@ impl Log for Ros2Logger {
             // TODO: TimeStamp
             let timestamp = builtin_interfaces::msg::Time {
                 sec: time as i32,
-                nanosec: 0
+                nanosec: 0,
             };
             log.stamp = timestamp;
             log.level = match record.level() {
@@ -230,6 +238,11 @@ pub fn init_with_env(node: std::sync::Arc<rclrs::Node>) -> Result<(), SetLoggerE
 ///
 /// Log messages below the given [`Level`] will be filtered.
 /// The `RUST_LOG` environment variable is not used.
-pub fn init_with_level(node: std::sync::Arc<rclrs::Node>, level: Level) -> Result<(), SetLoggerError> {
-    Ros2Logger::new(node).with_level(level.to_level_filter()).init()
+pub fn init_with_level(
+    node: std::sync::Arc<rclrs::Node>,
+    level: Level,
+) -> Result<(), SetLoggerError> {
+    Ros2Logger::new(node)
+        .with_level(level.to_level_filter())
+        .init()
 }

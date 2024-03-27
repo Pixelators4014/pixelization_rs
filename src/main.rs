@@ -1,16 +1,15 @@
+use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
+use nav_msgs::msg::Path as PathMsg;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use nav_msgs::msg::Path as PathMsg;
-use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 
-use log::{info, warn, error};
+use log::{error, info, warn};
 
 mod april_tags;
 mod kalman_filter;
 pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
-
 
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {

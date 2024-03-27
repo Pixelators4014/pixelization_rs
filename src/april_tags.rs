@@ -10,13 +10,13 @@ macro_rules! add_april_tag {
             nalgebra::Translation3::new(
                 ($x * 39.37) as f32,
                 ($y * 39.37) as f32,
-                ($z * 39.37) as f32
+                ($z * 39.37) as f32,
             ),
             nalgebra::geometry::UnitQuaternion::from(
-                nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle as f32)
-            )
+                nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle as f32),
+            ),
         )
-    }
+    };
 }
 
 // TODO: use vec
@@ -78,8 +78,18 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
                 let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
                 let inverse_robot_pose = relative_robot_pose.inverse();
                 let absolute_robot_pose = Isometry3::from_parts(
-                    Translation3::from(april_tag_pose.translation.vector + inverse_robot_pose.translation.vector),
-                    nalgebra::geometry::Rotation3::from_euler_angles(april_tag_pose.rotation.euler_angles().0 + inverse_robot_pose.rotation.euler_angles().0, april_tag_pose.rotation.euler_angles().1 + inverse_robot_pose.rotation.euler_angles().1, april_tag_pose.rotation.euler_angles().2 + inverse_robot_pose.rotation.euler_angles().2).into(),
+                    Translation3::from(
+                        april_tag_pose.translation.vector + inverse_robot_pose.translation.vector,
+                    ),
+                    nalgebra::geometry::Rotation3::from_euler_angles(
+                        april_tag_pose.rotation.euler_angles().0
+                            + inverse_robot_pose.rotation.euler_angles().0,
+                        april_tag_pose.rotation.euler_angles().1
+                            + inverse_robot_pose.rotation.euler_angles().1,
+                        april_tag_pose.rotation.euler_angles().2
+                            + inverse_robot_pose.rotation.euler_angles().2,
+                    )
+                    .into(),
                 );
                 let covariance = calc_abs_covariance(detection.pose.pose.covariance);
                 if covariance < lowest_covariance {
