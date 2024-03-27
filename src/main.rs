@@ -83,7 +83,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
 
     let t = tokio::task::spawn(async move {
         network_node.run_server().await;
-    });
+    }.clone());
     tokio::task::spawn(async move {
         run_ping(ping_path, ping_april_tags).await;
     });
