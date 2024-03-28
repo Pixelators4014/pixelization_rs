@@ -20,9 +20,10 @@ struct Pose {
 
 impl Pose {
     fn from_bytes(bytes: &[u8]) -> Result<Self, std::array::TryFromSliceError> {
-        if bytes.len() != 24 {
-            return Err(std::array::TryFromSliceError {});
-        }
+        // TODO: Re-enable
+        // if bytes.len() != 24 {
+        //     return Err(std::array::TryFromSliceError::new(bytes.len(), 24));
+        // }
         Ok(Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
             y: f32::from_le_bytes(bytes[4..8].try_into()?),
