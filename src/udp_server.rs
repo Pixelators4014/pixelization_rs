@@ -1,13 +1,18 @@
-use nav_msgs::msg::Path as PathMsg;
 use std::io;
 use std::sync::Arc;
+
 use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
+use thiserror::Error;
+
 use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 
 use log::{debug, info, warn};
+
+use nav_msgs::msg::Path as PathMsg;
+
 
 struct Pose {
     x: f32,
@@ -18,12 +23,20 @@ struct Pose {
     yaw: f32,
 }
 
+#[derive(Error, Debug)]
+enum PoseParseError {
+    #[error("Invalid number of bytes")]
+    InvalidNumberOfBytes,
+    #[error("Failed to parse float")]
+    ParseFloatError(#[from] std::num::ParseFloatError),
+}
+
 impl Pose {
-    fn from_bytes(bytes: &[u8]) -> Result<Self, std::array::TryFromSliceError> {
-        // TODO: Re-enable
-        // if bytes.len() != 24 {
-        //     return Err(std::array::TryFromSliceError::new(bytes.len(), 24));
-        // }
+    fn from_bytes(bytes: &[u8]) -> Result<Self, PoseParseError> {
+        // TODO: use separate error
+        if bytes.len() != 24 {
+            return PoseParseError::InvalidNumberOfBytes;
+        }
         Ok(Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
             y: f32::from_le_bytes(bytes[4..8].try_into()?),
@@ -46,6 +59,7 @@ impl Pose {
     }
 }
 
+
 enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
@@ -53,16 +67,28 @@ enum Request {
     Shutdown,
 }
 
+#[derive(Error, Debug)]
+enum RequestError {
+    #[error("Request too short, expected at least 1 byte.")]
+    TooShort,
+    #[error("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).")]
+    TooShortForSetVslamPose,
+    #[error("Unknown request first byte: {0}")]
+    UnknownFirstByte(u8),
+    #[error("Failed to parse pose: {0}")]
+    PoseError(#[from] PoseParseError),
+}
+
 impl Request {
-    fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, RequestError> {
         if bytes.len() < 1 {
-            return Err("Request too short, expected at least 1 byte.".to_string());
+            return Err(RequestError::TooShort);
         }
         return if bytes[0] == 0 {
             Ok(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            if bytes.len() == 25 {
-                return Err("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).".to_string());
+            if bytes.len() < 25 {
+                return Err(RequestError::TooShortForSetVslamPose);
             }
             Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26]).map_err(|e| e.to_string())?))
         } else if bytes[0] == 2 {
@@ -70,7 +96,7 @@ impl Request {
         } else if bytes[0] == 255 {
             Ok(Self::Shutdown)
         } else {
-            Err(format!("Unknown request first byte: {}", bytes[0]))
+            Err(RequestError::UnknownFirstByte(bytes[0]))
         };
     }
 }
@@ -222,8 +248,8 @@ impl Server {
         match request {
             Ok(request) => Self::process_request(data, client, request).await.to_bytes(),
             Err(e) => {
-                warn!("Invalid Request: {e}");
-                Response::Error(format!("Invalid Request: {e}")).to_bytes()
+                warn!("Invalid Request: {e:?}");
+                Response::Error(format!("Invalid Request: {e:?}")).to_bytes()
             },
         }
     }
