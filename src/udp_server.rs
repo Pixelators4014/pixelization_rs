@@ -188,7 +188,7 @@ impl Server {
                     },
                     Err(e) => {
                         warn!("Failed to set VSLAM pose due to rcl error: {e}");
-                        Response::Error(format!("Server Error: Failed to set VSLAM pose (rcl error): {e}".to_string()))
+                        Response::Error(format!("Server Error: Failed to set VSLAM pose (rcl error): {e}"))
                     }
                 }
             }
