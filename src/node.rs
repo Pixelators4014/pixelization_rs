@@ -67,10 +67,11 @@ impl NetworkNode {
         Ok(())
     }
 
-    pub async fn run_server(&self) {
+    pub async fn run_server(&self, shutdown_trigger: oneshot::Sender<()>) {
         let server =
             crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.client)).await;
         server.run().await.unwrap();
+        shutdown_trigger.send(()).unwrap(); // TODO: Redo this
     }
 
     pub async fn run_ping(&self) {

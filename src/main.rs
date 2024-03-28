@@ -8,6 +8,8 @@ pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
 
+pub use tokio::sync::oneshot;
+
 #[tokio::main]
 async fn main() -> Result<(), rclrs::RclrsError> {
     let context = rclrs::Context::new(std::env::args())?;
@@ -18,8 +20,10 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     let ping_network_node = Arc::clone(&network_node);
     let localizer_network_node = Arc::clone(&network_node);
 
+    let (tx, rx) = oneshot::channel();
+
     let t = tokio::task::spawn(async move {
-        server_network_node.run_server().await;
+        server_network_node.run_server(tx).await;
     });
 
     tokio::task::spawn(async move {
@@ -37,6 +41,10 @@ async fn main() -> Result<(), rclrs::RclrsError> {
         }
     });
     info!("Pixelization Node Up; Main Loop Idling");
+    if let Ok(_) = rx.await {
+        info!("Pixelization Node Shutting Down on server request.");
+        return Ok(());
+    }
     let _ = t.await;
     Ok(())
 }
