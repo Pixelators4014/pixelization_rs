@@ -1,4 +1,4 @@
-use nalgebra::{Rotation3, UnitQuaternion, Quaternion, Translation3};
+use nalgebra::{Rotation3, UnitQuaternion, Quaternion, Translation3, Isometry3};
 
 /// Kalman filter implementation for a single axis
 pub struct AxisKalmanFilter {
