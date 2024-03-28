@@ -182,12 +182,12 @@ impl Server {
                             // TODO: make sure this works
                             Response::Success
                         } else {
-                            warn!("Failed to set VSLAM pose: {service_request:?}");
+                            warn!("Failed to set VSLAM pose due to service error: {service_request:?}");
                             Response::Error("Server Error: Failed to set VSLAM pose (service error)".to_string())
                         }
                     },
                     Err(e) => {
-                        warn!("Failed to set VSLAM pose: {service_request:?}");
+                        warn!("Failed to set VSLAM pose due to rcl error: {service_request:?}");
                         Response::Error("Server Error: Failed to set VSLAM pose (rcl error)".to_string())
                     }
                 }
