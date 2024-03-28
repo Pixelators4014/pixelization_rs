@@ -35,7 +35,7 @@ impl Pose {
     fn from_bytes(bytes: &[u8]) -> Result<Self, PoseParseError> {
         // TODO: use separate error
         if bytes.len() != 24 {
-            return PoseParseError::InvalidNumberOfBytes;
+            return Err(PoseParseError::InvalidNumberOfBytes);
         }
         Ok(Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
