@@ -29,7 +29,6 @@
 //! ```
 
 use std::str::FromStr;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use log::{Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
