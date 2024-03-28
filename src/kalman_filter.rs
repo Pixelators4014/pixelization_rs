@@ -56,16 +56,16 @@ pub struct TranslationKalmanFilter {
 impl TranslationKalmanFilter {
     pub fn new(translation: Translation3<f32>, kalman_gain: f32, covariance1: f32, covariance2: f32, resulting_covariance: f32) -> Self {
         Self {
-            x: AxisKalmanFilter::new(translation.vector.data.0[0], kalman_gain, covariance1, covariance2, resulting_covariance),
-            y: AxisKalmanFilter::new(translation.vector.data.0[1], kalman_gain, covariance1, covariance2, resulting_covariance),
-            z: AxisKalmanFilter::new(translation.vector.data.0[2], kalman_gain, covariance1, covariance2, resulting_covariance),
+            x: AxisKalmanFilter::new(translation.vector.x, kalman_gain, covariance1, covariance2, resulting_covariance),
+            y: AxisKalmanFilter::new(translation.vector.y, kalman_gain, covariance1, covariance2, resulting_covariance),
+            z: AxisKalmanFilter::new(translation.vector.z, kalman_gain, covariance1, covariance2, resulting_covariance),
         }
     }
 
     pub fn update(&mut self, translation1: Translation3<f32>, translation2: Translation3<f32>) {
-        self.x.update(translation1.vector.data.0[0], translation2.vector.data.0[0]);
-        self.y.update(translation1.vector.data.0[1], translation2.vector.data.0[1]);
-        self.z.update(translation1.vector.data.0[2], translation2.vector.data.0[2]);
+        self.x.update(translation1.vector.x, translation2.vector.x);
+        self.y.update(translation1.vector.y, translation2.vector.y);
+        self.z.update(translation1.vector.z, translation2.vector.z);
     }
 
     pub fn value(&self) -> Translation3<f32> {
