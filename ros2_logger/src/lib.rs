@@ -66,7 +66,7 @@ impl Ros2Logger {
     #[must_use = "You must call init() to begin logging"]
     pub fn new(node: std::sync::Arc<rclrs::Node>) -> Ros2Logger {
         let publisher = node
-            .create_publisher::<rcl_interfaces::msg::Log>("/ros_out", rclrs::QOS_PROFILE_DEFAULT)
+            .create_publisher::<rcl_interfaces::msg::Log>("/rosout", rclrs::QOS_PROFILE_DEFAULT)
             .unwrap();
         Ros2Logger {
             default_level: LevelFilter::Trace,
