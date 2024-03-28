@@ -28,9 +28,12 @@
 //! ros2_logger::init_with_level(log::Level::Warn).unwrap();
 //! ```
 
-use log::{Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::str::FromStr;
 use std::time::{SystemTime, UNIX_EPOCH};
+
+use log::{Level, LevelFilter, Log, Metadata, Record, SetLoggerError};
+
+use rclrs::Clock;
 
 /// Implements [`Log`] and a set of simple builder methods for configuration.
 ///
@@ -48,6 +51,7 @@ pub struct Ros2Logger {
     /// vector for the first match to give us the desired log level for a module.
     module_levels: Vec<(String, LevelFilter)>,
     ros_out_publisher: std::sync::Arc<rclrs::Publisher<rcl_interfaces::msg::Log>>,
+    clock: rclrs::Clock,
 }
 
 impl Ros2Logger {
@@ -72,6 +76,7 @@ impl Ros2Logger {
             default_level: LevelFilter::Trace,
             module_levels: Vec::new(),
             ros_out_publisher: publisher,
+            clock: Clock::system(),
         }
     }
 
@@ -195,19 +200,17 @@ impl Log for Ros2Logger {
                 record.module_path().unwrap_or_default()
             };
 
-            let time = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs();
+            let time = self.clock.now().nsec;
+            let time_secs = time / 1_000_000_000_f64;
 
-            let message = format!("[{level_string}] [{time}]: {}", record.args());
+            let message = format!("[{level_string}] [{time_secs}]: {}", record.args());
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
             // TODO: Use ros2 clock from rclrs (rclrs::Clock)
             let timestamp = builtin_interfaces::msg::Time {
-                sec: time as i32,
-                nanosec: 0,
+                sec: time_secs.trunc() as i32,
+                nanosec: time % 1_000_000_000 as u32,
             };
             log.stamp = timestamp;
             log.level = match record.level() {
