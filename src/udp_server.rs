@@ -209,7 +209,7 @@ impl Server {
             Ok(request) => Self::process_request(data, client, request).await.to_bytes(),
             Err(e) => {
                 warn!("Invalid Request: {e}");
-                Response::Error(format!("Invalid Request: {e}".to_string())).to_bytes()
+                Response::Error(format!("Invalid Request: {e}")).to_bytes()
             },
         }
     }
