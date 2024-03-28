@@ -201,16 +201,15 @@ impl Log for Ros2Logger {
             };
 
             let time = self.clock.now().nsec;
-            let time_secs = time / 1_000_000_000_f64;
+            let time_secs = time as f64 / 1_000_000_000_f64;
 
             let message = format!("[{level_string}] [{time_secs}]: {}", record.args());
 
             eprintln!("{}", message);
             let mut log = rcl_interfaces::msg::Log::default();
-            // TODO: Use ros2 clock from rclrs (rclrs::Clock)
             let timestamp = builtin_interfaces::msg::Time {
                 sec: time_secs.trunc() as i32,
-                nanosec: time % 1_000_000_000 as u32,
+                nanosec: (time % 1_000_000_000) as u32,
             };
             log.stamp = timestamp;
             log.level = match record.level() {
