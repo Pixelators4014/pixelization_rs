@@ -20,6 +20,9 @@ struct Pose {
 
 impl Pose {
     fn from_bytes(bytes: &[u8]) -> Result<Self, std::array::TryFromSliceError> {
+        if bytes.len() != 24 {
+            return Err(std::array::TryFromSliceError {});
+        }
         Ok(Self {
             x: f32::from_le_bytes(bytes[0..4].try_into()?),
             y: f32::from_le_bytes(bytes[4..8].try_into()?),
@@ -50,10 +53,16 @@ enum Request {
 
 impl Request {
     fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.len() < 1 {
+            return Err("Request too short, expected at least 1 byte.".to_string());
+        }
         return if bytes[0] == 0 {
             Ok(Self::GetVslamPose)
         } else if bytes[0] == 1 {
-            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..]).map_err(|e| e.to_string())?))
+            if bytes.len() == 25 {
+                return Err("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).".to_string());
+            }
+            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26]).map_err(|e| e.to_string())?))
         } else if bytes[0] == 2 {
             Ok(Self::GetDetections)
         } else {
