@@ -30,7 +30,9 @@ def generate_launch_description():
         parameters=[{
             'enable_infra1': True,
             'enable_infra2': True,
-            'enable_color': False,
+            'enable_color': True,
+            'color_height': 1080,
+            'color_width': 1920,
             'enable_depth': False,
             'depth_module.emitter_enabled': 0,
             'depth_module.profile': '640x360x90',
@@ -40,6 +42,28 @@ def generate_launch_description():
             'accel_fps': 200,
             'unite_imu_method': 2
         }]
+    )
+    rectify_node = ComposableNode(
+        package='isaac_ros_image_proc',
+        plugin='nvidia::isaac_ros::image_proc::RectifyNode',
+        name='rectify',
+        namespace='',
+        parameters=[{
+            'output_width': 1920,
+            'output_height': 1080,
+        }],
+        remappings=[('/image', 'camera/color/image_raw'),
+                    ('/camera_info', 'camera/color/camera_info')]
+    )
+
+    apriltag_node = ComposableNode(
+        package='isaac_ros_apriltag',
+        plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
+        name='apriltag',
+        namespace='',
+        parameters=[{'max_tags': 16}],
+        remappings=[('/image', 'camera/color/image_raw'),
+                    ('/camera_info', 'camera/color/camera_info')]
     )
 
     visual_slam_node = ComposableNode(
@@ -73,12 +97,14 @@ def generate_launch_description():
                     ('visual_slam/imu', 'camera/imu')]
     )
 
-    visual_slam_launch_container = ComposableNodeContainer(
-        name='visual_slam_launch_container',
-        namespace='',
+    isaac_container = ComposableNodeContainer(
         package='rclcpp_components',
-        executable='component_container',
+        name='isaac_compenents_container',
+        namespace='',
+        executable='component_container_mt',
         composable_node_descriptions=[
+            rectify_node,
+            apriltag_node,
             visual_slam_node
         ],
         output='screen'
@@ -91,4 +117,4 @@ def generate_launch_description():
         executable='main',
     )
 
-    return launch.LaunchDescription([visual_slam_launch_container, realsense_camera_node, comms_node])
+    return launch.LaunchDescription([isaac_container, realsense_camera_node, comms_node])

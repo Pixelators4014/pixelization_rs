@@ -14,7 +14,13 @@ pub struct AxisKalmanFilter {
 }
 
 impl AxisKalmanFilter {
-    pub fn new(value: f32, kalman_gain: f32, covariance1: f32, covariance2: f32, resulting_covariance: f32) -> Self {
+    pub fn new(
+        value: f32,
+        kalman_gain: f32,
+        covariance1: f32,
+        covariance2: f32,
+        resulting_covariance: f32,
+    ) -> Self {
         Self {
             value,
             covariance1,
