@@ -41,9 +41,7 @@ def generate_launch_description():
             'gyro_fps': 200,
             'accel_fps': 200,
             'unite_imu_method': 2
-        }],
-        remappings=[('/image', 'camera/color/image_raw'),
-                    ('/camera_info', 'camera/color/camera_info')]
+        }]
     )
     rectify_node = ComposableNode(
         package='isaac_ros_image_proc',
@@ -53,7 +51,9 @@ def generate_launch_description():
         parameters=[{
             'output_width': 1920,
             'output_height': 1080,
-        }]
+        }],
+        remappings=[('/image', 'camera/color/image_raw'),
+                    ('/camera_info', 'camera/color/camera_info')]
     )
 
     apriltag_node = ComposableNode(
@@ -61,7 +61,9 @@ def generate_launch_description():
         plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
         name='apriltag',
         namespace='',
-        parameters=[{'max_tags': 16}]
+        parameters=[{'max_tags': 16}],
+        remappings=[('/image', 'camera/color/image_raw'),
+                    ('/camera_info', 'camera/color/camera_info')]
     )
 
     visual_slam_node = ComposableNode(
