@@ -42,8 +42,8 @@ def generate_launch_description():
             'accel_fps': 200,
             'unite_imu_method': 2
         }],
-        remappings=[('/color/image_raw', '/image'),
-                    ('/color/camera_info', '/camera_info')]
+        remappings=[('camera/color/image_raw', '/image'),
+                    ('camera/color/camera_info', '/camera_info')]
     )
     rectify_node = ComposableNode(
         package='isaac_ros_image_proc',
