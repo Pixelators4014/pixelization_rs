@@ -49,6 +49,7 @@ enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
     GetDetections,
+    Shutdown,
 }
 
 impl Request {
@@ -65,6 +66,8 @@ impl Request {
             Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26]).map_err(|e| e.to_string())?))
         } else if bytes[0] == 2 {
             Ok(Self::GetDetections)
+        } else if bytes[0] == 255 {
+            Ok(Self::Shutdown)
         } else {
             Err(format!("Unknown request first byte: {}", bytes[0]))
         };
@@ -200,9 +203,10 @@ impl Server {
                         Response::Error(format!("Server Error: Failed to set VSLAM pose (rcl error): {e}"))
                     }
                 }
-            }
+            },
+            Request::Shutdown => panic!("Shutting down server"), // TODO: Shutdown more things
             Request::GetDetections => {
-                // TODO: Fix
+                // TODO: Fix (actually return detections somehow)
                 Response::Success
             }
         };
