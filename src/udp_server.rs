@@ -90,7 +90,7 @@ impl Request {
             if bytes.len() < 25 {
                 return Err(RequestError::TooShortForSetVslamPose);
             }
-            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26]).map_err(|e| e.to_string())?))
+            Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26])?))
         } else if bytes[0] == 2 {
             Ok(Self::GetDetections)
         } else if bytes[0] == 255 {
