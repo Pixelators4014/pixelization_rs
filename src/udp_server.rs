@@ -28,7 +28,7 @@ enum PoseParseError {
     #[error("Invalid number of bytes")]
     InvalidNumberOfBytes,
     #[error("Failed to parse float")]
-    ParseFloatError(#[from] std::num::ParseFloatError),
+    ParseFloatError(#[from] std::array::TryFromSliceError),
 }
 
 impl Pose {
