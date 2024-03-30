@@ -59,4 +59,4 @@ RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
 RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
 
 # # TODO: Add the entrypoint
-CMD [ "/bin/bash", "-c", "ros2 launch pixelization_rs run.launch.py" ]
+CMD [ "/bin/bash", "-c", ". /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && ros2 launch pixelization_rs run.launch.py" ]
