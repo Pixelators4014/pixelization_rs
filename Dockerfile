@@ -53,7 +53,8 @@ WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
 RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
-RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-install --packages-up-to pixelization_rs
+RUN rm -rf /workspaces/isaac_ros-dev/install && rm -rf /workspaces/isaac_ros-dev/build
+RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-install
 RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
 RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
 
