@@ -29,9 +29,6 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     tokio::task::spawn(async move {
         ping_network_node.run_ping().await;
     });
-    tokio::task::spawn(async move {
-        localizer_network_node.run_localizer().await;
-    });
 
     network_node.init().await?;
 
