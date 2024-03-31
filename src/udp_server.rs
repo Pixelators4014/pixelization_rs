@@ -292,7 +292,6 @@ impl Server {
                             addr: packet.addr,
                             buf: new_bytes,
                         };
-                        info!("Response = {addr:?}", addr = packet.buf);
                         shared_tx.send(packet).await.unwrap(); // Send them to queue back to clients
                     });
                 }
