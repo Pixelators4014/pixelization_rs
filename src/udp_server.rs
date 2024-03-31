@@ -166,11 +166,12 @@ impl Server {
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
         request: Request,
     ) -> Response {
-        debug!("Request: {request:?}");
+        trace!("Request: {request:?}");
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
+                        println!("Last pose: {last:?}");
                         let rotation =
                             Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(
                                 last.pose.orientation.w,
@@ -271,7 +272,7 @@ impl Server {
                 let mut buffer = [0u8; 512];
                 let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
                 if let Ok((_, src)) = result {
-                    debug!("Request from {src:?}");
+                    trace!("Request from {src:?}");
                     let packet = Packet {
                         buf: buffer.to_vec(),
                         addr: src,
