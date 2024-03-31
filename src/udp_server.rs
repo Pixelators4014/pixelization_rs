@@ -9,11 +9,12 @@ use thiserror::Error;
 
 use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 
-use log::{debug, info, warn};
+use log::{trace, debug, info, warn};
 
 use nav_msgs::msg::Path as PathMsg;
 
 
+#[derive(Copy, Clone, Debug)]
 struct Pose {
     x: f32,
     y: f32,
@@ -164,6 +165,7 @@ impl Server {
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
         request: Request,
     ) -> Response {
+        trace!("Request: {request:?}");
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
@@ -184,13 +186,16 @@ impl Server {
                             pitch: rotation.1 as f32,
                             yaw: rotation.2 as f32,
                         };
+                        trace!("Response: {response:?}");
                         Response::Pose(response.into())
                     } else {
+                        warn!("No VSLAM data received, vslam might still being initializing");
                         Response::Error(
                             "Server Error: No VSLAM data, please wait or check logs".to_string(),
                         )
                     }
                 } else {
+                    warn!("No VSLAM data received");
                     Response::Error("Server Error: No VSLAM data".to_string())
                 }
             }
@@ -265,7 +270,7 @@ impl Server {
                 let mut buffer = [0u8; 512];
                 let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
                 if let Ok((_, src)) = result {
-                    info!("Request from {src:?}");
+                    trace!("Request from {src:?}");
                     let packet = Packet {
                         buf: buffer.to_vec(),
                         addr: src,
