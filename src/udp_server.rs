@@ -188,7 +188,7 @@ impl Server {
                             pitch: rotation.1 as f32,
                             yaw: rotation.2 as f32,
                         };
-                        debug!("Response: {response:?}");
+                        trace!("Response: {response:?}");
                         Response::Pose(response.into())
                     } else {
                         warn!("No VSLAM data received, vslam might still being initializing");
