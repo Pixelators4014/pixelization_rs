@@ -61,6 +61,7 @@ impl Pose {
 }
 
 
+#[derive(Copy, Clone, Debug)]
 enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
