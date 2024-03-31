@@ -155,7 +155,7 @@ impl Server {
         Self {
             data,
             client,
-            socket: Arc::new(UdpSocket::bind("127.0.0.1:5800").await.unwrap()),
+            socket: Arc::new(UdpSocket::bind("10.40.14.11:5800").await.unwrap()),
         }
     }
 
