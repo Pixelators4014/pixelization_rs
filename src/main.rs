@@ -18,7 +18,6 @@ async fn main() -> Result<(), rclrs::RclrsError> {
     info!("Starting Pixelization Node");
     let server_network_node = Arc::clone(&network_node);
     let ping_network_node = Arc::clone(&network_node);
-    let localizer_network_node = Arc::clone(&network_node);
 
     let (tx, rx) = oneshot::channel();
 
@@ -34,7 +33,7 @@ async fn main() -> Result<(), rclrs::RclrsError> {
 
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
-            error!("{:?}", e);
+            error!("RCLRS Error on Spin: {:?}", e);
         }
     });
     info!("Pixelization Node Up; Main Loop Idling");
