@@ -166,7 +166,7 @@ impl Server {
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
         request: Request,
     ) -> Response {
-        trace!("Request: {request:?}");
+        debug!("Request: {request:?}");
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
@@ -187,7 +187,7 @@ impl Server {
                             pitch: rotation.1 as f32,
                             yaw: rotation.2 as f32,
                         };
-                        trace!("Response: {response:?}");
+                        debug!("Response: {response:?}");
                         Response::Pose(response.into())
                     } else {
                         warn!("No VSLAM data received, vslam might still being initializing");
@@ -271,7 +271,7 @@ impl Server {
                 let mut buffer = [0u8; 512];
                 let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
                 if let Ok((_, src)) = result {
-                    trace!("Request from {src:?}");
+                    debug!("Request from {src:?}");
                     let packet = Packet {
                         buf: buffer.to_vec(),
                         addr: src,
