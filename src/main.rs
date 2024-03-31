@@ -4,7 +4,7 @@ use std::net::{SocketAddr, UdpSocket};
 fn main() -> io::Result<()> {
     // Bind the UDP socket to a local port
     let socket = UdpSocket::bind("10.40.14.11:5800")?;
-    println!("Listening on {}", self.socket.local_addr()?);
+    println!("Listening on {}", socket.local_addr()?);
 
     let mut buf = [0; 1024]; // Buffer to store incoming packets
 
