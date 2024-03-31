@@ -1,50 +1,26 @@
-use std::sync::Arc;
+use std::io;
+use std::net::{SocketAddr, UdpSocket};
 
-use log::{error, info};
+fn main() -> io::Result<()> {
+    // Bind the UDP socket to a local port
+    let socket = UdpSocket::bind("10.40.14.11:5800")?;
+    println!("UDP server listening on 10.40.14.11:7878");
 
-mod april_tags;
-mod kalman_filter;
-pub(crate) mod node;
-pub(crate) mod udp_server;
-pub mod util;
+    let mut buf = [0; 1024]; // Buffer to store incoming packets
 
-pub use tokio::sync::oneshot;
+    loop {
+        // Wait for a packet to arrive and capture the sender's address
+        let (amt, src) = socket.recv_from(&mut buf)?;
 
-#[tokio::main]
-async fn main() -> Result<(), rclrs::RclrsError> {
-    let context = rclrs::Context::new(std::env::args())?;
-    let network_node = Arc::new(node::NetworkNode::new(&context)?);
-    ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Info).unwrap();
-    info!("Starting Pixelization Node");
-    let server_network_node = Arc::clone(&network_node);
-    let ping_network_node = Arc::clone(&network_node);
-    let localizer_network_node = Arc::clone(&network_node);
+        println!("Received {} bytes from {}", amt, src);
 
-    let (tx, rx) = oneshot::channel();
+        // Create a blank 25-byte packet
+        let blank_packet = [0u8; 25];
 
-    let t = tokio::task::spawn(async move {
-        server_network_node.run_server(tx).await;
-    });
-
-    tokio::task::spawn(async move {
-        ping_network_node.run_ping().await;
-    });
-    tokio::task::spawn(async move {
-        localizer_network_node.run_localizer().await;
-    });
-
-    network_node.init().await?;
-
-    std::thread::spawn(move || {
-        if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
-            error!("{:?}", e);
+        // Send the blank packet back to the sender
+        match socket.send_to(&blank_packet, &src) {
+            Ok(sent) => println!("Sent {} bytes back to {}", sent, src),
+            Err(e) => eprintln!("Couldn't send a response: {}", e),
         }
-    });
-    info!("Pixelization Node Up; Main Loop Idling");
-    if let Ok(_) = rx.await {
-        info!("Pixelization Node Shutting Down on server request.");
-        return Ok(());
     }
-    let _ = t.await;
-    Ok(())
 }
