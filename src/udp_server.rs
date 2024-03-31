@@ -171,7 +171,7 @@ impl Server {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
                     if let Some(last) = msg.poses.last() {
-                        println!("Last pose: {last:?}");
+                        info!("Last pose: {last:?}");
                         let rotation =
                             Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(
                                 last.pose.orientation.w,
