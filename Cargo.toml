@@ -1,44 +1,8 @@
-workspace = { members = ["ros2_logger"] }
 [package]
 name = "pixelization_rs"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "main"
-path = "src/main.rs"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = { version = "1", features = ["backtrace"] }
-log = "0.4"
-ros2_logger = { path = "ros2_logger" }
-nalgebra = "*"
-tokio = { version = "1", features = ["full"] }
-lazy_static = "1.4.0"
-thiserror = "1.0"
-
-[dependencies.rclrs]
-version = "0.4"
-
-[dependencies.rosidl_runtime_rs]
-version = "0.4"
-
-[dependencies.std_msgs]
-version = "*"
-
-[dependencies.nav_msgs]
-version = "*"
-
-[dependencies.geometry_msgs]
-version = "*"
-
-[dependencies.isaac_ros_apriltag_interfaces]
-version = "*"
-
-[dependencies.isaac_ros_visual_slam_interfaces]
-version = "*"
-
-[package.metadata.ros]
-install_to_share = ["launch"]
