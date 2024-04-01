@@ -33,8 +33,14 @@ async fn main() -> Result<()> {
         ping_network_node.run_ping().await;
     });
 
-    tokio::task::spawn(async move {
-        april_tags_localizer_node.run_april_tag_localizer().await;
+    std::thread::spawn(move || {
+        // Create the runtime
+        let rt = tokio::runtime::Runtime::new().unwrap();
+
+        // TODO: april_tags_localizer_node.run_april_tag_localizer() is not SEND
+        rt.block_on(async {
+            april_tags_localizer_node.run_april_tag_localizer().await;
+        });
     });
 
     network_node.init().await?;
