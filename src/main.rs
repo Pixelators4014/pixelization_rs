@@ -53,15 +53,15 @@ async fn main() -> Result<()> {
         }
     });
 
-    std::thread::spawn(move || {
-        Command::new("/opt/ros/humble/bin/ros2")
-            .arg("launch")
-            .arg("isaac_ros_visual_slam")
-            .arg("isaac_ros_visual_slam_realsense.launch.py")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn().unwrap();
-    });
+    // std::thread::spawn(move || {
+    //     Command::new("/opt/ros/humble/bin/ros2")
+    //         .arg("launch")
+    //         .arg("isaac_ros_visual_slam")
+    //         .arg("isaac_ros_visual_slam_realsense.launch.py")
+    //         .stdout(Stdio::piped())
+    //         .stderr(Stdio::piped())
+    //         .spawn().unwrap();
+    // });
 
     info!("Pixelization Node Up; Main Loop Idling");
     if let Ok(_) = rx.await {
