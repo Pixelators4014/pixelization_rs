@@ -51,6 +51,7 @@ impl NetworkNode {
             "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
+                // TODO: send a timestamp into the channel instead
                 *april_tags_cb.blocking_write() = Some(msg.clone());
                 tx.send(msg).unwrap();
             },
