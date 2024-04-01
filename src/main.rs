@@ -1,4 +1,6 @@
 use std::sync::Arc;
+use std::process::{Command, Stdio};
+
 
 use log::{error, info};
 
@@ -51,16 +53,13 @@ async fn main() -> Result<()> {
         }
     });
 
-    #[cfg(feature = "master_executor")]
-    {
-        use std::process::Command;
-        std::thread::spawn(move || {
-            Command::new("/opt/ros/humble/bin/ros2")
-                .arg("launch")
-                .arg("isaac_ros_visual_slam")
-                .arg("isaac_ros_visual_slam_realsense.launch.py");
-        });
-    }
+    std::thread::spawn(move || {
+        Command::new("/opt/ros/humble/bin/ros2")
+            .arg("launch")
+            .arg("isaac_ros_visual_slam")
+            .arg("isaac_ros_visual_slam_realsense.launch.py")
+            .stdout(Stdio::piped());
+    });
 
     info!("Pixelization Node Up; Main Loop Idling");
     if let Ok(_) = rx.await {
