@@ -73,7 +73,7 @@ enum Request {
     Shutdown,
 }
 
-#[derive(Clone, Error, Debug)]
+#[derive(Error, Debug)]
 pub enum ServerError {
     #[error("Request too short, expected at least 1 byte.")]
     TooShort,
