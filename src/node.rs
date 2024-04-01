@@ -72,7 +72,7 @@ impl NetworkNode {
                                 },
                             },
                         };
-                    let response = client.call_async(&service_request).await.unwrap();
+                    let response = client.call(&service_request).unwrap();
                     if response.success {
                         debug!("Set Odometry Pose: {service_request:?}");
                     } else {
