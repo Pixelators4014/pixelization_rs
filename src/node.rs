@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use log::{debug, info, warn, error};
 
-use tokio::sync::{oneshot, RwLock};
+use tokio::sync::{oneshot, RwLock, watch};
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use nav_msgs::msg::Path as PathMsg;
@@ -18,6 +18,7 @@ pub struct NetworkNode {
     pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
+    pub april_tags_receiver: watch::Receiver<AprilTagDetectionArray>,
 }
 
 impl NetworkNode {
@@ -41,10 +42,11 @@ impl NetworkNode {
                 },
             )?;
 
+        let blank_detection_array = AprilTagDetectionArray::default();
+        let (tx, mut rx) = watch::channel(blank_detection_array);
+
         let april_tags = Arc::new(RwLock::new(None));
         let april_tags_cb = Arc::clone(&april_tags);
-        let april_tags_client = Arc::clone(&client);
-
         let april_tags_subscription = node.create_subscription(
             "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
@@ -130,5 +132,9 @@ impl NetworkNode {
             }
             tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
         }
+    }
+
+    pub fn run_april_tag_localizer(&self) {
+
     }
 }
