@@ -21,6 +21,7 @@ async fn main() -> Result<()> {
     info!("Starting Pixelization Node");
     let server_network_node = Arc::clone(&network_node);
     let ping_network_node = Arc::clone(&network_node);
+    let april_tags_localizer_node = Arc::clone(&network_node);
 
     let (tx, rx) = oneshot::channel();
 
@@ -30,6 +31,10 @@ async fn main() -> Result<()> {
 
     tokio::task::spawn(async move {
         ping_network_node.run_ping().await;
+    });
+
+    tokio::task::spawn(async move {
+        april_tags_localizer_node.run_april_tag_localizer().await;
     });
 
     network_node.init().await?;

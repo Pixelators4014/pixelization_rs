@@ -1,6 +1,6 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
-use log::{debug, info, warn, error};
+use log::{debug, info, warn, error, trace};
 
 use tokio::sync::{oneshot, RwLock, watch};
 
@@ -18,7 +18,7 @@ pub struct NetworkNode {
     pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
-    pub april_tags_receiver: watch::Receiver<AprilTagDetectionArray>,
+    pub april_tags_receiver: Mutex<watch::Receiver<AprilTagDetectionArray>>,
 }
 
 impl NetworkNode {
@@ -52,35 +52,6 @@ impl NetworkNode {
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
                 *april_tags_cb.blocking_write() = Some(msg);
-                let april_tags_pose = april_tags::localize(&msg);
-                if let Some(april_tags_pose) = april_tags_pose {
-                    info!("Using April Tags Pose: {april_tags_pose:?}");
-                    // TODO: impl kalman filter
-                    let final_pose = april_tags_pose;
-                    let client = Arc::clone(&april_tags_client);
-                    let service_request =
-                        isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
-                            pose: geometry_msgs::msg::Pose {
-                                position: geometry_msgs::msg::Point {
-                                    x: final_pose.translation.x as f64,
-                                    y: final_pose.translation.y as f64,
-                                    z: final_pose.translation.z as f64,
-                                },
-                                orientation: geometry_msgs::msg::Quaternion {
-                                    w: final_pose.rotation.quaternion().coords[3] as f64,
-                                    x: final_pose.rotation.quaternion().coords[0] as f64,
-                                    y: final_pose.rotation.quaternion().coords[1] as f64,
-                                    z: final_pose.rotation.quaternion().coords[2] as f64,
-                                },
-                            },
-                        };
-                    let response = client.call(&service_request).unwrap();
-                    if response.success {
-                        debug!("Set Odometry Pose: {service_request:?}");
-                    } else {
-                        error!("Failed to set Odometry Pose: {service_request:?}");
-                    }
-                }
             },
         )?;
         Ok(Self {
@@ -135,7 +106,45 @@ impl NetworkNode {
         }
     }
 
-    pub fn run_april_tag_localizer(&self) {
-
+    pub async fn run_april_tag_localizer(&self) {
+        let mut rx = self.april_tags_receiver.lock().unwrap();
+        loop {
+            if rx.has_changed().unwrap() {
+                let april_tags = rx.borrow_and_update();
+                trace!("April Tags: {april_tags:?}");
+                let april_tags_pose = april_tags::localize(april_tags);
+                if let Some(april_tags_pose) = april_tags_pose {
+                    info!("Using April Tags Pose: {april_tags_pose:?}");
+                    // TODO: impl kalman filter
+                    let final_pose = april_tags_pose;
+                    let client = Arc::clone(&april_tags_client);
+                    let service_request =
+                        isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                            pose: geometry_msgs::msg::Pose {
+                                position: geometry_msgs::msg::Point {
+                                    x: final_pose.translation.x as f64,
+                                    y: final_pose.translation.y as f64,
+                                    z: final_pose.translation.z as f64,
+                                },
+                                orientation: geometry_msgs::msg::Quaternion {
+                                    w: final_pose.rotation.quaternion().coords[3] as f64,
+                                    x: final_pose.rotation.quaternion().coords[0] as f64,
+                                    y: final_pose.rotation.quaternion().coords[1] as f64,
+                                    z: final_pose.rotation.quaternion().coords[2] as f64,
+                                },
+                            },
+                        };
+                    let response = client.call(&service_request).unwrap();
+                    if response.success {
+                        debug!("Set Odometry Pose: {service_request:?}");
+                    } else {
+                        error!("Failed to set Odometry Pose: {service_request:?}");
+                    }
+                }
+            }
+            if rx.changed().await.is_err() {
+                return;
+            }
+        }
     }
 }
