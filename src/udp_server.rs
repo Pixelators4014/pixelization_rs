@@ -1,6 +1,8 @@
 use std::io;
 use std::sync::Arc;
 
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+
 use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
@@ -12,6 +14,9 @@ use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 use log::{trace, debug, info, warn};
 
 use nav_msgs::msg::Path as PathMsg;
+
+const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
+const PORT: u16 = 5800;
 
 
 #[derive(Copy, Clone, Debug)]
@@ -157,7 +162,7 @@ impl Server {
         Self {
             data,
             client,
-            socket: Arc::new(UdpSocket::bind("10.40.14.11:5800").await.unwrap()),
+            socket: Arc::new(UdpSocket::bind(SocketAddr::new(HOST, PORT)).await.unwrap()),
         }
     }
 
@@ -203,7 +208,7 @@ impl Server {
             }
             Request::SetVslamPose(pose) => {
                 let unit_quaternion =
-                    nalgebra::UnitQuaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
+                    UnitQuaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
                 let quaternion = unit_quaternion.quaternion();
                 let service_request =
                     isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
