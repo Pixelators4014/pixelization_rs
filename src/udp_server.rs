@@ -64,15 +64,6 @@ impl Pose {
     }
 }
 
-
-#[derive(Copy, Clone, Debug)]
-enum Request {
-    GetVslamPose,
-    SetVslamPose(Pose),
-    GetDetections,
-    Shutdown,
-}
-
 #[derive(Error, Debug)]
 pub enum ServerError {
     #[error("Request too short, expected at least 1 byte.")]
@@ -85,6 +76,14 @@ pub enum ServerError {
     PoseError(#[from] PoseParseError),
     #[error("I/O error: {0}")]
     IoError(#[from] io::Error),
+    ServerShutdown,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum Request {
+    GetVslamPose,
+    SetVslamPose(Pose),
+    GetDetections,
 }
 
 impl Request {
@@ -101,8 +100,6 @@ impl Request {
             Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26])?))
         } else if bytes[0] == 2 {
             Ok(Self::GetDetections)
-        } else if bytes[0] == 255 {
-            Ok(Self::Shutdown)
         } else {
             Err(ServerError::UnknownFirstByte(bytes[0]))
         };
@@ -232,7 +229,6 @@ impl Server {
                 match response_res {
                     Ok(response) => {
                         if response.success {
-                            // TODO: make sure this works
                             Response::Success
                         } else {
                             warn!("Failed to set VSLAM pose due to service error: {service_request:?}");
@@ -245,7 +241,6 @@ impl Server {
                     }
                 }
             },
-            Request::Shutdown => panic!("Shutting down server"), // TODO: Shutdown more things
             Request::GetDetections => {
                 // TODO: Fix (actually return detections somehow)
                 Response::Success
@@ -274,7 +269,7 @@ impl Server {
         let task_socket = Arc::clone(&self.socket);
         let task_data = Arc::clone(&self.data);
         let task_client = Arc::clone(&self.client);
-        tokio::spawn(async move {
+        let t = tokio::spawn(async move {
             loop {
                 let mut buffer = [0u8; 512];
                 let result = Arc::clone(&task_socket).recv_from(&mut buffer).await;
@@ -309,6 +304,10 @@ impl Server {
         });
 
         while let Some(packet) = rx.recv().await {
+            if t.is_finished() {
+                error!("Server handler task finished unexpectedly.");
+                return Err(ServerError::ServerShutdown);
+            }
             // transfer response packet to the client.
             debug!("Response to {addr:?}", addr = packet.addr);
             let _ = Arc::clone(&self.socket)

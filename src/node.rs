@@ -42,6 +42,8 @@ impl NetworkNode {
                 },
             )?;
 
+
+        // Setup send channel
         let blank_detection_array = AprilTagDetectionArray::default();
         let (tx, rx) = watch::channel(blank_detection_array);
 
@@ -79,7 +81,7 @@ impl NetworkNode {
         let server =
             crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.client)).await;
         server.run().await.unwrap();
-        shutdown_trigger.send(()).unwrap(); // TODO: Redo this
+        shutdown_trigger.send(()).unwrap();
     }
 
     pub async fn run_ping(&self) {
