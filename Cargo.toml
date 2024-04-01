@@ -12,6 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
+clap = { version = "4", features = ["derive"] }
 log = "0.4"
 ros2_logger = { path = "ros2_logger" }
 nalgebra = "*"
