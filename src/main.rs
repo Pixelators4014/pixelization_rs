@@ -50,6 +50,12 @@ async fn main() -> Result<()> {
             error!("RCLRS Error on Spin: {:?}", e);
         }
     });
+
+    #[cfg(feature = "master_executor")]
+    {
+        std::thread::spawn(move || {})
+    }
+
     info!("Pixelization Node Up; Main Loop Idling");
     if let Ok(_) = rx.await {
         info!("Pixelization Node Shutting Down on server request.");

@@ -42,3 +42,6 @@ version = "*"
 
 [package.metadata.ros]
 install_to_share = ["launch"]
+
+[features]
+master_executor = []
