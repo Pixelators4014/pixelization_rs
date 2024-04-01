@@ -11,7 +11,7 @@ use thiserror::Error;
 
 use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 
-use log::{trace, debug, info, warn};
+use log::{trace, debug, info, warn, error};
 
 use nav_msgs::msg::Path as PathMsg;
 
@@ -29,7 +29,7 @@ struct Pose {
     yaw: f32,
 }
 
-#[derive(Error, Debug)]
+#[derive(Copy, Clone, Error, Debug)]
 enum PoseParseError {
     #[error("Invalid number of bytes")]
     InvalidNumberOfBytes,
@@ -39,7 +39,6 @@ enum PoseParseError {
 
 impl Pose {
     fn from_bytes(bytes: &[u8]) -> Result<Self, PoseParseError> {
-        // TODO: use separate error
         if bytes.len() != 24 {
             return Err(PoseParseError::InvalidNumberOfBytes);
         }
@@ -74,8 +73,8 @@ enum Request {
     Shutdown,
 }
 
-#[derive(Error, Debug)]
-enum RequestError {
+#[derive(Copy, Clone, Error, Debug)]
+pub enum ServerError {
     #[error("Request too short, expected at least 1 byte.")]
     TooShort,
     #[error("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).")]
@@ -84,18 +83,20 @@ enum RequestError {
     UnknownFirstByte(u8),
     #[error("Failed to parse pose: {0}")]
     PoseError(#[from] PoseParseError),
+    #[error("I/O error: {0}")]
+    IoError(#[from] io::Error),
 }
 
 impl Request {
-    fn from_bytes(bytes: &[u8]) -> Result<Self, RequestError> {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, ServerError> {
         if bytes.len() < 1 {
-            return Err(RequestError::TooShort);
+            return Err(ServerError::TooShort);
         }
         return if bytes[0] == 0 {
             Ok(Self::GetVslamPose)
         } else if bytes[0] == 1 {
             if bytes.len() < 25 {
-                return Err(RequestError::TooShortForSetVslamPose);
+                return Err(ServerError::TooShortForSetVslamPose);
             }
             Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26])?))
         } else if bytes[0] == 2 {
@@ -103,15 +104,16 @@ impl Request {
         } else if bytes[0] == 255 {
             Ok(Self::Shutdown)
         } else {
-            Err(RequestError::UnknownFirstByte(bytes[0]))
+            Err(ServerError::UnknownFirstByte(bytes[0]))
         };
     }
 }
 
+#[derive(Clone, Copy)]
 enum Response {
     Pose(Pose),
     Success,
-    Error(String),
+    Error(String), // TODO: ServerError instead
 }
 
 impl Response {
@@ -145,7 +147,7 @@ impl From<Pose> for Response {
 
 struct Packet {
     buf: Vec<u8>,
-    addr: std::net::SocketAddr,
+    addr: SocketAddr,
 }
 
 pub struct Server {
@@ -266,7 +268,7 @@ impl Server {
         }
     }
 
-    pub async fn run(&self) -> io::Result<()> {
+    pub async fn run(&self) -> Result<(), ServerError> {
         info!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);
         let task_socket = Arc::clone(&self.socket);
@@ -297,7 +299,10 @@ impl Server {
                             addr: packet.addr,
                             buf: new_bytes,
                         };
-                        shared_tx.send(packet).await.unwrap(); // Send them to queue back to clients
+                        let res = shared_tx.send(packet).await;
+                        if let Err(e) = res {
+                            error!("Failed to send response: {e:?}");
+                        }
                     });
                 }
             }

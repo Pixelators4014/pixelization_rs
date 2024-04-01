@@ -23,6 +23,11 @@ pub struct NetworkNode {
 impl NetworkNode {
     pub fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
+
+        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>(
+            "visual_slam/set_odometry_pose",
+        )?;
+
         let path = Arc::new(RwLock::new(None));
         let path_cb = Arc::clone(&path);
         let path_subscription =
@@ -35,8 +40,11 @@ impl NetworkNode {
                     *path_cb.blocking_write() = Some(msg);
                 },
             )?;
+
         let april_tags = Arc::new(RwLock::new(None));
         let april_tags_cb = Arc::clone(&april_tags);
+        let april_tags_client = Arc::clone(&client);
+
         let april_tags_subscription = node.create_subscription(
             "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
@@ -47,7 +55,7 @@ impl NetworkNode {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
                     // TODO: impl kalman filter
                     let final_pose = april_tags_pose;
-                    let client = Arc::clone(&self.client);
+                    let client = Arc::clone(&april_tags_client);
                     let service_request =
                         isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
                             pose: geometry_msgs::msg::Pose {
@@ -72,10 +80,6 @@ impl NetworkNode {
                     }
                 }
             },
-        )?;
-
-        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>(
-            "visual_slam/set_odometry_pose",
         )?;
         Ok(Self {
             node,

@@ -7,11 +7,14 @@ mod kalman_filter;
 pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
+pub mod error;
 
 pub use tokio::sync::oneshot;
 
+pub type Result<T> = std::result::Result<T, error::Error>;
+
 #[tokio::main]
-async fn main() -> Result<(), rclrs::RclrsError> {
+async fn main() -> Result<()> {
     let context = rclrs::Context::new(std::env::args())?;
     let network_node = Arc::new(node::NetworkNode::new(&context)?);
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Debug).unwrap();
