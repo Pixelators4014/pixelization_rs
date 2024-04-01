@@ -76,6 +76,7 @@ pub enum ServerError {
     PoseError(#[from] PoseParseError),
     #[error("I/O error: {0}")]
     IoError(#[from] io::Error),
+    #[error("Unexpected server shutdown/panic")]
     ServerShutdown,
 }
 
