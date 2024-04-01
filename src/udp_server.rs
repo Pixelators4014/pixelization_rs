@@ -159,10 +159,19 @@ impl Server {
         data: Arc<RwLock<Option<PathMsg>>>,
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     ) -> Self {
-        Self {
-            data,
-            client,
-            socket: Arc::new(UdpSocket::bind(SocketAddr::new(HOST, PORT)).await.unwrap()),
+        if let Ok(socket) = UdpSocket::bind(SocketAddr::new(HOST, PORT)).await {
+            Self {
+                data,
+                client,
+                socket: Arc::new(socket),
+            }
+        } else {
+            warn!("Failed to bind to static UDP socket");
+            Self {
+                data,
+                client,
+                socket: Arc::new(UdpSocket::bind(SocketAddr::new("127.0.0.1".parse().unwrap(), PORT)).await.unwrap()),
+            }
         }
     }
 
