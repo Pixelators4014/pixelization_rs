@@ -54,6 +54,8 @@ async fn main() -> Result<()> {
     if let Ok(_) = rx.await {
         info!("Pixelization Node Shutting Down on server request.");
         return Ok(());
+    } else {
+        error!("rx channel closed unexpectedly, waiting on server.");
     }
     let _ = t.await;
     Ok(())
