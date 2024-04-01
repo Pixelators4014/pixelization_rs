@@ -43,7 +43,7 @@ impl NetworkNode {
             )?;
 
         let blank_detection_array = AprilTagDetectionArray::default();
-        let (tx, mut rx) = watch::channel(blank_detection_array);
+        let (tx, rx) = watch::channel(blank_detection_array);
 
         let april_tags = Arc::new(RwLock::new(None));
         let april_tags_cb = Arc::clone(&april_tags);
@@ -89,7 +89,8 @@ impl NetworkNode {
             april_tags_subscription,
             client,
             path,
-            april_tags
+            april_tags,
+            april_tags_receiver: rx,
         })
     }
 
