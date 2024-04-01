@@ -17,6 +17,7 @@ pub struct NetworkNode {
     pub april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
     pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
+    pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
 }
 
 impl NetworkNode {
@@ -34,10 +35,13 @@ impl NetworkNode {
                     *path_cb.blocking_write() = Some(msg);
                 },
             )?;
+        let april_tags = Arc::new(RwLock::new(None));
+        let april_tags_cb = Arc::clone(&april_tags);
         let april_tags_subscription = node.create_subscription(
             "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
+                *april_tags_cb.blocking_write() = Some(msg);
                 let april_tags_pose = april_tags::localize(msg);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
@@ -79,6 +83,7 @@ impl NetworkNode {
             april_tags_subscription,
             client,
             path,
+            april_tags
         })
     }
 
