@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
 
     #[cfg(feature = "master_executor")]
     {
-        std::thread::spawn(move || {})
+        std::thread::spawn(move || {});
     }
 
     info!("Pixelization Node Up; Main Loop Idling");
