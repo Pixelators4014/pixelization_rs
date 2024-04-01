@@ -53,7 +53,13 @@ async fn main() -> Result<()> {
 
     #[cfg(feature = "master_executor")]
     {
-        std::thread::spawn(move || {});
+        use std::process::Command;
+        std::thread::spawn(move || {
+            Command::new("/opt/ros/humble/bin/ros2")
+                .arg("launch")
+                .arg("isaac_ros_visual_slam")
+                .arg("isaac_ros_visual_slam_realsense.launch.py");
+        });
     }
 
     info!("Pixelization Node Up; Main Loop Idling");
