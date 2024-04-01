@@ -61,7 +61,7 @@ impl NetworkNode {
             client,
             path,
             april_tags,
-            april_tags_receiver: rx,
+            april_tags_receiver: Mutex::new(rx),
         })
     }
 
