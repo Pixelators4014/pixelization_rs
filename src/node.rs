@@ -50,7 +50,7 @@ impl NetworkNode {
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
                 *april_tags_cb.blocking_write() = Some(msg);
-                let april_tags_pose = april_tags::localize(msg);
+                let april_tags_pose = april_tags::localize(&msg);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
                     // TODO: impl kalman filter
