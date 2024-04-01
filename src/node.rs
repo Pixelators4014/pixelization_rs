@@ -52,6 +52,7 @@ impl NetworkNode {
             rclrs::QOS_PROFILE_DEFAULT,
             move |msg: AprilTagDetectionArray| {
                 *april_tags_cb.blocking_write() = Some(msg);
+                tx.send(msg).unwrap();
             },
         )?;
         Ok(Self {
