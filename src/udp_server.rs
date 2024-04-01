@@ -73,7 +73,7 @@ enum Request {
     Shutdown,
 }
 
-#[derive(Copy, Clone, Error, Debug)]
+#[derive(Clone, Error, Debug)]
 pub enum ServerError {
     #[error("Request too short, expected at least 1 byte.")]
     TooShort,
@@ -109,7 +109,7 @@ impl Request {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Response {
     Pose(Pose),
     Success,
