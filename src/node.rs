@@ -113,6 +113,7 @@ impl NetworkNode {
                 let april_tags = rx.borrow_and_update();
                 trace!("April Tags: {april_tags:?}");
                 let april_tags_pose = april_tags::localize(&april_tags);
+                drop(april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
                     // TODO: impl kalman filter
