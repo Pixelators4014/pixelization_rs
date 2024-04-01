@@ -58,7 +58,9 @@ async fn main() -> Result<()> {
             .arg("launch")
             .arg("isaac_ros_visual_slam")
             .arg("isaac_ros_visual_slam_realsense.launch.py")
-            .stdout(Stdio::piped());
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn().unwrap();
     });
 
     info!("Pixelization Node Up; Main Loop Idling");
