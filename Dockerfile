@@ -58,5 +58,7 @@ RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-ins
 RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
 RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
 
+RUN cd src/pixelization_rs && . /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && . ~/.cargo/env && cargo build -r
+
 # # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", ". /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && source docker_entrypoint.sh" ]
