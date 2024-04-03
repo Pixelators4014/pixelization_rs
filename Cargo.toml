@@ -43,3 +43,8 @@ version = "*"
 
 [package.metadata.ros]
 install_to_share = ["launch"]
+
+[features]
+default = []
+kalman = []
+object-detection = []

@@ -1,20 +1,3 @@
-# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 import launch
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
@@ -22,50 +5,29 @@ from launch_ros.descriptions import ComposableNode
 
 def generate_launch_description():
     """Launch file which brings up visual slam node configured for RealSense."""
-    realsense_camera_node = Node(
-        name='camera',
-        namespace='camera',
+
+    realsense_camera_node = ComposableNode(
         package='realsense2_camera',
-        executable='realsense2_camera_node',
+        plugin='realsense2_camera::RealSenseNodeFactory',
+        name='realsense2_camera',
+        namespace='',
         parameters=[{
+            'color_height': 1080,
+            'color_width': 1920,
             'enable_infra1': True,
             'enable_infra2': True,
             'enable_color': True,
-            'color_height': 1080,
-            'color_width': 1920,
-            'enable_depth': True,
-            'depth_module.emitter_enabled': 1,
+            'enable_depth': False,
+            'depth_module.emitter_enabled': 0,
             'depth_module.profile': '640x360x90',
-            'align_depth.enable': True,
-            'pointcloud.enable': True,
             'enable_gyro': True,
             'enable_accel': True,
             'gyro_fps': 200,
             'accel_fps': 200,
             'unite_imu_method': 2
-        }]
-    )
-    rectify_node = ComposableNode(
-        package='isaac_ros_image_proc',
-        plugin='nvidia::isaac_ros::image_proc::RectifyNode',
-        name='rectify',
-        namespace='',
-        parameters=[{
-            'output_width': 1920,
-            'output_height': 1080,
         }],
-        remappings=[('/image', 'camera/color/image_raw'),
-                    ('/camera_info', 'camera/color/camera_info')]
-    )
-
-    apriltag_node = ComposableNode(
-        package='isaac_ros_apriltag',
-        plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
-        name='apriltag',
-        namespace='',
-        parameters=[{'max_tags': 16}],
-        remappings=[('/image', 'camera/color/image_raw'),
-                    ('/camera_info', 'camera/color/camera_info')]
+        remappings=[('/color/image_raw', '/image'),
+                    ('/color/camera_info', '/camera_info')]
     )
 
     visual_slam_node = ComposableNode(
@@ -99,17 +61,34 @@ def generate_launch_description():
                     ('visual_slam/imu', 'camera/imu')]
     )
 
-    isaac_container = ComposableNodeContainer(
-        package='rclcpp_components',
-        name='isaac_compenents_container',
+    visual_slam_launch_container = ComposableNodeContainer(
+        name='visual_slam_launch_container',
         namespace='',
+        package='rclcpp_components',
         executable='component_container_mt',
         composable_node_descriptions=[
-            rectify_node,
-            apriltag_node,
+            realsense_camera_node,
             visual_slam_node
         ],
         output='screen'
     )
 
-    return launch.LaunchDescription([isaac_container, realsense_camera_node])
+    rectify_node = ComposableNode(
+        package='isaac_ros_image_proc',
+        plugin='nvidia::isaac_ros::image_proc::RectifyNode',
+        name='rectify',
+        namespace='',
+        parameters=[{
+            'output_width': 1920,
+            'output_height': 1080,
+        }]
+    )
+
+    apriltag_node = ComposableNode(
+        package='isaac_ros_apriltag',
+        plugin='nvidia::isaac_ros::apriltag::AprilTagNode',
+        name='apriltag',
+        namespace=''
+    )
+
+    return launch.LaunchDescription([visual_slam_launch_container, realsense_camera_node, rectify_node, apriltag_node])
