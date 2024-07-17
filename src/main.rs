@@ -1,6 +1,4 @@
 use std::sync::Arc;
-use std::process::{Command, Stdio};
-
 
 use log::{error, info};
 
@@ -9,6 +7,7 @@ pub(crate) mod node;
 pub(crate) mod udp_server;
 pub mod util;
 pub mod error;
+mod task;
 
 pub use tokio::sync::oneshot;
 
@@ -17,26 +16,14 @@ pub type Result<T> = std::result::Result<T, error::Error>;
 #[tokio::main]
 async fn main() -> Result<()> {
     let context = rclrs::Context::new(std::env::args())?;
-    let network_node = Arc::new(node::NetworkNode::new(&context)?);
+    let (tx, rx) = oneshot::channel();
+    let network_node = Arc::new(node::NetworkNode::new(&context, tx).await?);
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Debug).unwrap();
     info!("Starting Pixelization Node");
     let april_tags_localizer_node = Arc::clone(&network_node);
 
-    let (tx, rx) = oneshot::channel();
 
-    let t = tokio::task::spawn({
-        let network_node = Arc::clone(&network_node);
-        async move {
-            network_node.run_server(tx).await;
-        }
-    });
-
-    tokio::task::spawn({
-       let network_node = Arc::clone(&network_node);
-       async move {
-           network_node.run_ping().await;
-       }
-    });
+    let _ = network_node.run_tasks();
 
     std::thread::spawn(move || {
         // Create the runtime
@@ -56,16 +43,6 @@ async fn main() -> Result<()> {
         }
     });
 
-    // std::thread::spawn(move || {
-    //     Command::new("/opt/ros/humble/bin/ros2")
-    //         .arg("launch")
-    //         .arg("isaac_ros_visual_slam")
-    //         .arg("isaac_ros_visual_slam_realsense.launch.py")
-    //         .stdout(Stdio::piped())
-    //         .stderr(Stdio::piped())
-    //         .spawn().unwrap();
-    // });
-
     info!("Pixelization Node Up; Main Loop Idling");
     if let Ok(_) = rx.await {
         info!("Pixelization Node Shutting Down on server request.");
@@ -73,6 +50,5 @@ async fn main() -> Result<()> {
     } else {
         error!("rx channel closed unexpectedly, waiting on server.");
     }
-    let _ = t.await;
     Ok(())
 }

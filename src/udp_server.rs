@@ -30,7 +30,7 @@ struct Pose {
 }
 
 #[derive(Copy, Clone, Error, Debug)]
-enum PoseParseError {
+pub enum PoseParseError {
     #[error("Invalid number of bytes")]
     InvalidNumberOfBytes,
     #[error("Failed to parse float")]
