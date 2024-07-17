@@ -20,22 +20,9 @@ async fn main() -> Result<()> {
     let network_node = Arc::new(node::NetworkNode::new(&context, tx).await?);
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Debug).unwrap();
     info!("Starting Pixelization Node");
-    let april_tags_localizer_node = Arc::clone(&network_node);
-
-
-    let _ = network_node.run_tasks();
-
-    std::thread::spawn(move || {
-        // Create the runtime
-        let rt = tokio::runtime::Runtime::new().unwrap();
-
-        // TODO: april_tags_localizer_node.run_april_tag_localizer() is not SEND
-        rt.block_on(async {
-            april_tags_localizer_node.run_april_tag_localizer().await;
-        });
-    });
 
     network_node.init().await?;
+    let _ = network_node.run_tasks();
 
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {

@@ -1,22 +1,22 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use async_trait::async_trait;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
 use log::{debug, error, info, trace, warn};
-use tokio::sync::{RwLock, watch};
+use tokio::sync::{Mutex, RwLock, watch};
 use crate::node::TaskContext;
 use crate::task::Task;
 use nav_msgs::msg::Path as PathMsg;
 use rclrs::Client;
 
-pub struct Ping {
+pub struct AprilTags {
     path: Arc<RwLock<Option<PathMsg>>>,
     april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
     april_tags_receiver: Arc<Mutex<watch::Receiver<chrono::DateTime<chrono::Utc>>>>,
     client: Arc<Client<SetSlamPose>>,
 }
 
-impl Ping {
+impl AprilTags {
     pub async fn new(context: TaskContext) -> Self {
         Self {
             path: context.path,
@@ -28,17 +28,17 @@ impl Ping {
 }
 
 #[async_trait]
-impl Task for Ping {
+impl Task for AprilTags {
     async fn run(&self) {
-        let mut rx = self.april_tags_receiver.lock().unwrap();
+        let mut rx = self.april_tags_receiver.lock().await;
         loop {
             if rx.has_changed().unwrap() {
-                let april_tags = rx.borrow_and_update();
-                trace!("April Tags: {april_tags:?}");
+                let _date = rx.borrow_and_update();
+                drop(_date);
                 let current_april_tags = self.april_tags.read().await;
+                trace!("April Tags: {:?}", current_april_tags.as_ref());
                 let april_tags_pose = crate::april_tags::localize(current_april_tags.as_ref().unwrap());
                 drop(current_april_tags);
-                drop(april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
                     let final_pose = april_tags_pose;

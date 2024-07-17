@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use log::{debug, info, error, trace};
 
-use tokio::sync::{oneshot, RwLock, watch};
+use tokio::sync::{oneshot, RwLock, watch, Mutex};
 
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use nav_msgs::msg::Path as PathMsg;
@@ -93,8 +93,9 @@ impl NetworkNode {
 
         let ping_task = task::Ping::new(task_context.clone());
         let server_task = task::Server::new(task_context.clone());
-        let tasks = join!(ping_task, server_task);
-        let tasks: Vec<Arc<dyn Task>> = vec![Arc::new(tasks.0), Arc::new(tasks.1)];
+        let april_tags_task = task::AprilTags::new(task_context.clone());
+        let tasks = join!(ping_task, server_task, april_tags_task);
+        let tasks: Vec<Arc<dyn Task>> = vec![Arc::new(tasks.0), Arc::new(tasks.1), Arc::new(tasks.2)];
 
         Ok(Self {
             tasks,
