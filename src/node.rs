@@ -17,15 +17,16 @@ pub struct TaskContext {
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
     pub april_tags_receiver: Arc<Mutex<watch::Receiver<chrono::DateTime<chrono::Utc>>>>,
+    pub parameters: Parameters,
 }
 
 pub struct NetworkNode {
     pub node: Arc<rclrs::Node>,
     pub tasks: Vec<Arc<dyn Task>>,
     pub task_context: TaskContext,
-    pub parameters: Parameters,
 }
 
+#[derive(Copy, Clone)]
 pub struct Parameters {
     pub april_tags: bool,
     pub object_detection: bool,
@@ -100,6 +101,7 @@ impl NetworkNode {
             path,
             april_tags,
             april_tags_receiver: Arc::new(Mutex::new(rx)),
+            parameters
         };
 
         let mut tasks: Vec<Arc<dyn Task>> = vec![];
@@ -114,7 +116,6 @@ impl NetworkNode {
 
         Ok(Self {
             tasks,
-            parameters,
             node,
             task_context,
         })

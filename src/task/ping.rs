@@ -1,4 +1,4 @@
-use crate::node::TaskContext;
+use crate::node::{Parameters, TaskContext};
 use crate::task::Task;
 use async_trait::async_trait;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
@@ -10,6 +10,7 @@ use tokio::sync::RwLock;
 pub struct Ping {
     path: Arc<RwLock<Option<PathMsg>>>,
     april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
+    parameters: Parameters
 }
 
 impl Ping {
@@ -17,6 +18,7 @@ impl Ping {
         Self {
             path: context.path,
             april_tags: context.april_tags,
+            parameters: context.parameters
         }
     }
 }
@@ -37,12 +39,7 @@ impl Task for Ping {
             }
             drop(data);
             let data = self.april_tags.read().await;
-            if let Some(april_tags) = data.as_ref() {
-                debug!(
-                    "April Tags is running: {} april tags",
-                    april_tags.detections.len()
-                );
-            } else {
+            if data.is_none() && self.parameters.april_tags {
                 warn!("April Tags not connected yet");
             }
             tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
