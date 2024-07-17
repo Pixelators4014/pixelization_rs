@@ -1,11 +1,11 @@
-use std::sync::Arc;
+use crate::node::TaskContext;
+use crate::task::Task;
 use async_trait::async_trait;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use log::{debug, warn};
-use tokio::sync::RwLock;
-use crate::node::TaskContext;
-use crate::task::Task;
 use nav_msgs::msg::Path as PathMsg;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 pub struct Ping {
     path: Arc<RwLock<Option<PathMsg>>>,

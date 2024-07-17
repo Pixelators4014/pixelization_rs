@@ -88,7 +88,7 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
                         april_tag_pose.rotation.euler_angles().2
                             + inverse_robot_pose.rotation.euler_angles().2,
                     )
-                        .into(),
+                    .into(),
                 );
                 let covariance = calc_abs_covariance(detection.pose.pose.covariance);
                 if covariance < lowest_covariance {

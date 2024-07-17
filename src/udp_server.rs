@@ -11,13 +11,12 @@ use thiserror::Error;
 
 use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 
-use log::{trace, debug, info, warn, error};
+use log::{debug, error, info, trace, warn};
 
 use nav_msgs::msg::Path as PathMsg;
 
 const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
 const PORT: u16 = 5800;
-
 
 #[derive(Copy, Clone, Debug)]
 struct Pose {
@@ -170,7 +169,11 @@ impl Server {
             Self {
                 data,
                 client,
-                socket: Arc::new(UdpSocket::bind(SocketAddr::new("127.0.0.1".parse().unwrap(), PORT)).await.unwrap()),
+                socket: Arc::new(
+                    UdpSocket::bind(SocketAddr::new("127.0.0.1".parse().unwrap(), PORT))
+                        .await
+                        .unwrap(),
+                ),
             }
         }
     }
@@ -193,7 +196,7 @@ impl Server {
                                 last.pose.orientation.y,
                                 last.pose.orientation.z,
                             )))
-                                .euler_angles();
+                            .euler_angles();
                         let response = Pose {
                             x: last.pose.position.x as f32,
                             y: last.pose.position.y as f32,
@@ -219,22 +222,21 @@ impl Server {
                 let unit_quaternion =
                     UnitQuaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
                 let quaternion = unit_quaternion.quaternion();
-                let service_request =
-                    isaac_ros_visual_slam_interfaces::srv::SetSlamPose_Request {
-                        pose: geometry_msgs::msg::Pose {
-                            position: geometry_msgs::msg::Point {
-                                x: pose.x as f64,
-                                y: pose.y as f64,
-                                z: pose.z as f64,
-                            },
-                            orientation: geometry_msgs::msg::Quaternion {
-                                w: quaternion.coords[3] as f64,
-                                x: quaternion.coords[0] as f64,
-                                y: quaternion.coords[1] as f64,
-                                z: quaternion.coords[2] as f64,
-                            },
+                let service_request = isaac_ros_visual_slam_interfaces::srv::SetSlamPose_Request {
+                    pose: geometry_msgs::msg::Pose {
+                        position: geometry_msgs::msg::Point {
+                            x: pose.x as f64,
+                            y: pose.y as f64,
+                            z: pose.z as f64,
                         },
-                    };
+                        orientation: geometry_msgs::msg::Quaternion {
+                            w: quaternion.coords[3] as f64,
+                            x: quaternion.coords[0] as f64,
+                            y: quaternion.coords[1] as f64,
+                            z: quaternion.coords[2] as f64,
+                        },
+                    },
+                };
                 let response_res = client.call_async(&service_request).await;
                 match response_res {
                     Ok(response) => {
@@ -242,15 +244,20 @@ impl Server {
                             Response::Success
                         } else {
                             warn!("Failed to set VSLAM pose due to service error: {service_request:?}");
-                            Response::Error("Server Error: Failed to set VSLAM pose (service error)".to_string())
+                            Response::Error(
+                                "Server Error: Failed to set VSLAM pose (service error)"
+                                    .to_string(),
+                            )
                         }
-                    },
+                    }
                     Err(e) => {
                         warn!("Failed to set VSLAM pose due to rcl error: {e}");
-                        Response::Error(format!("Server Error: Failed to set VSLAM pose (rcl error): {e}"))
+                        Response::Error(format!(
+                            "Server Error: Failed to set VSLAM pose (rcl error): {e}"
+                        ))
                     }
                 }
-            },
+            }
             Request::GetDetections => {
                 // TODO: Fix (actually return detections somehow)
                 Response::Success
@@ -265,11 +272,13 @@ impl Server {
     ) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         match request {
-            Ok(request) => Self::process_request(data, client, request).await.to_bytes(),
+            Ok(request) => Self::process_request(data, client, request)
+                .await
+                .to_bytes(),
             Err(e) => {
                 warn!("Invalid Request: {e:?}");
                 Response::Error(format!("Invalid Request: {e:?}")).to_bytes()
-            },
+            }
         }
     }
 
@@ -299,7 +308,7 @@ impl Server {
                             Arc::clone(&inner_client),
                             &packet.buf,
                         )
-                            .await;
+                        .await;
                         let packet = Packet {
                             addr: packet.addr,
                             buf: new_bytes,

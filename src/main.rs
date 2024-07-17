@@ -5,11 +5,12 @@
 /// ## Parameters
 /// `april_tags` - (true by default) Enables or disables april tags.
 /// `object_detection` - (true by default) Enables or disables object detection.
-/// `vslam` - (true by default) Enables or disables VSLAM.
+/// `server` - (true by default) Enables or disables the udp server (useful for debugging only).
 /// ## Tasks
 /// - April tag localizer (TODO: should be its own node)
 /// - Ping, which ensures everything is working
 /// - Server, which broadcasts the data out to the world
+
 use std::sync::Arc;
 
 use log::{error, info};

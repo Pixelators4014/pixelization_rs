@@ -1,13 +1,13 @@
-use std::sync::Arc;
+use crate::node::TaskContext;
+use crate::task::Task;
 use async_trait::async_trait;
 use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
-use log::{debug, error, info, trace, warn};
-use tokio::sync::{Mutex, RwLock, watch};
-use crate::node::TaskContext;
-use crate::task::Task;
+use log::{debug, error, info, trace};
 use nav_msgs::msg::Path as PathMsg;
 use rclrs::Client;
+use std::sync::Arc;
+use tokio::sync::{watch, Mutex, RwLock};
 
 pub struct AprilTags {
     path: Arc<RwLock<Option<PathMsg>>>,
@@ -22,7 +22,7 @@ impl AprilTags {
             path: context.path,
             april_tags: context.april_tags,
             april_tags_receiver: context.april_tags_receiver,
-            client: context.client
+            client: context.client,
         }
     }
 }
@@ -37,7 +37,8 @@ impl Task for AprilTags {
                 drop(_date);
                 let current_april_tags = self.april_tags.read().await;
                 trace!("April Tags: {:?}", current_april_tags.as_ref());
-                let april_tags_pose = crate::april_tags::localize(current_april_tags.as_ref().unwrap());
+                let april_tags_pose =
+                    crate::april_tags::localize(current_april_tags.as_ref().unwrap());
                 drop(current_april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");

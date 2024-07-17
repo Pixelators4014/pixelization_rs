@@ -18,7 +18,7 @@ impl Server {
     pub async fn new(context: TaskContext) -> Self {
         Self {
             path: context.path,
-            client: context.client
+            client: context.client,
         }
     }
 }
