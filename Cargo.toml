@@ -5,10 +5,12 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "main"
-path = "src/main.rs"
+name = "network_node"
+path = "src/network_node/main.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "localizer"
+path = "src/localizer/main.rs"
 
 [dependencies]
 anyhow = { version = "1", features = ["backtrace"] }

@@ -1,8 +1,6 @@
-mod april_tags;
 mod ping;
 mod server;
 
-pub use april_tags::AprilTags;
 pub use ping::Ping;
 pub use server::Server;
 

@@ -3,11 +3,9 @@
 /// This aims to be a "communications" node, it feeds in "odometry" data to vslam
 /// and takes the stuff from vslam and object detection and sets up a UDP server to send it to RobotRIO.
 /// ## Parameters
-/// `april_tags` - (true by default) Enables or disables april tags.
 /// `object_detection` - (true by default) Enables or disables object detection.
 /// `server` - (true by default) Enables or disables the udp server (useful for debugging only).
 /// ## Tasks
-/// - April tag localizer (TODO: should be its own node)
 /// - Ping, which ensures everything is working
 /// - Server, which broadcasts the data out to the world
 
@@ -15,12 +13,10 @@ use std::sync::Arc;
 
 use log::{error, info};
 
-mod april_tags;
 pub mod error;
-pub(crate) mod node;
+pub mod node;
 mod task;
-pub(crate) mod udp_server;
-pub mod util;
+pub mod udp_server;
 
 pub use tokio::sync::oneshot;
 

@@ -1,22 +1,19 @@
 use log::info;
 use std::sync::Arc;
-
+use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
 use tokio::sync::{oneshot, watch, Mutex, RwLock};
 
 use crate::task::Task;
 use crate::task;
-use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use nav_msgs::msg::Path as PathMsg;
+use rclrs::Client;
 use tokio::join;
 
 #[derive(Clone)]
 pub struct TaskContext {
     pub _path_subscription: Arc<rclrs::Subscription<PathMsg>>,
-    pub _april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
-    pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
-    pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
-    pub april_tags_receiver: Arc<Mutex<watch::Receiver<chrono::DateTime<chrono::Utc>>>>,
+    pub set_pose: Arc<Client<SetSlamPose>>,
     pub parameters: Parameters,
 }
 
@@ -28,7 +25,6 @@ pub struct NetworkNode {
 
 #[derive(Copy, Clone)]
 pub struct Parameters {
-    pub april_tags: bool,
     pub object_detection: bool,
     pub server: bool,
 }
@@ -39,11 +35,6 @@ impl NetworkNode {
         _shutdown_trigger: oneshot::Sender<()>,
     ) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
-        let param_april_tags = node
-            .declare_parameter("april_tags")
-            .default(true)
-            .mandatory()
-            .unwrap();
         let param_object_detection = node
             .declare_parameter("object_detection")
             .default(true)
@@ -56,14 +47,9 @@ impl NetworkNode {
             .unwrap();
 
         let parameters = Parameters {
-            april_tags: param_april_tags.get(),
             object_detection: param_object_detection.get(),
             server: param_server.get(),
         };
-
-        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>(
-            "visual_slam/set_odometry_pose",
-        )?;
 
         let path = Arc::new(RwLock::new(None));
         let path_subscription =
@@ -79,28 +65,13 @@ impl NetworkNode {
                     }
                 }
             )?;
-
-        // Setup send channel
-        let now = chrono::Utc::now();
-        let (tx, rx) = watch::channel(now);
-
-        let april_tags = Arc::new(RwLock::new(None));
-        let april_tags_subscription =
-            node.create_subscription("/tag_detections", rclrs::QOS_PROFILE_DEFAULT, {
-                let april_tags_cb = Arc::clone(&april_tags);
-                move |msg: AprilTagDetectionArray| {
-                    *april_tags_cb.blocking_write() = Some(msg.clone());
-                    tx.send(chrono::Utc::now()).unwrap();
-                }
-            })?;
-
+        let set_pose = node.create_client::<SetSlamPose>(
+            "visual_slam/set_slam_pose",
+        )?;
         let task_context = TaskContext {
             _path_subscription: path_subscription,
-            _april_tags_subscription: april_tags_subscription,
-            client,
             path,
-            april_tags,
-            april_tags_receiver: Arc::new(Mutex::new(rx)),
+            set_pose,
             parameters
         };
 
@@ -109,10 +80,6 @@ impl NetworkNode {
         if parameters.server {
             tasks.push(Arc::new(task::Server::new(task_context.clone()).await));
         }
-        if parameters.april_tags {
-            tasks.push(Arc::new(task::AprilTags::new(task_context.clone()).await));
-        }
-
 
         Ok(Self {
             tasks,
@@ -122,7 +89,7 @@ impl NetworkNode {
     }
 
     pub async fn init(&self) -> Result<(), rclrs::RclrsError> {
-        while !self.task_context.client.service_is_ready()? {
+        while !self.task_context.set_pose.service_is_ready()? {
             tokio::time::sleep(std::time::Duration::from_millis(10)).await;
             info!("Waiting for service to initialize ...");
         }

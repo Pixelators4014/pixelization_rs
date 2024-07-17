@@ -9,7 +9,6 @@ use tokio::sync::RwLock;
 
 pub struct Ping {
     path: Arc<RwLock<Option<PathMsg>>>,
-    april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
     parameters: Parameters
 }
 
@@ -17,7 +16,6 @@ impl Ping {
     pub async fn new(context: TaskContext) -> Self {
         Self {
             path: context.path,
-            april_tags: context.april_tags,
             parameters: context.parameters
         }
     }
@@ -38,10 +36,6 @@ impl Task for Ping {
                 warn!("VSLAM not connected yet");
             }
             drop(data);
-            let data = self.april_tags.read().await;
-            if data.is_none() && self.parameters.april_tags {
-                warn!("April Tags not connected yet");
-            }
             tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
         }
     }

@@ -11,14 +11,14 @@ use crate::task::Task;
 
 pub struct Server {
     path: Arc<RwLock<Option<PathMsg>>>,
-    client: Arc<Client<SetSlamPose>>,
+    set_pose: Arc<Client<SetSlamPose>>,
 }
 
 impl Server {
     pub async fn new(context: TaskContext) -> Self {
         Self {
             path: context.path,
-            client: context.client,
+            set_pose: context.set_pose,
         }
     }
 }
@@ -27,7 +27,7 @@ impl Server {
 impl Task for Server {
     async fn run(&self) {
         let server =
-            crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.client)).await;
+            crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.set_pose)).await;
         server.run().await.unwrap();
         // TODO: Fix
         // self.shutdown_trigger.send(()).unwrap();
