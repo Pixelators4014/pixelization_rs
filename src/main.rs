@@ -22,17 +22,22 @@ async fn main() -> Result<()> {
     ros2_logger::init_with_level(Arc::clone(&network_node.node), log::Level::Debug).unwrap();
     info!("Starting Pixelization Node");
     let server_network_node = Arc::clone(&network_node);
-    let ping_network_node = Arc::clone(&network_node);
     let april_tags_localizer_node = Arc::clone(&network_node);
 
     let (tx, rx) = oneshot::channel();
 
-    let t = tokio::task::spawn(async move {
-        server_network_node.run_server(tx).await;
+    let t = tokio::task::spawn({
+        let network_node = Arc::clone(&network_node);
+        async move {
+            network_node.run_server(tx).await;
+        }
     });
 
-    tokio::task::spawn(async move {
-        ping_network_node.run_ping().await;
+    tokio::task::spawn({
+       let network_node = Arc::clone(&network_node);
+       async move {
+           network_node.run_ping().await;
+       }
     });
 
     std::thread::spawn(move || {
