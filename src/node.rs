@@ -119,11 +119,12 @@ impl NetworkNode {
             if rx.has_changed().unwrap() {
                 let april_tags = rx.borrow_and_update();
                 trace!("April Tags: {april_tags:?}");
-                let april_tags_pose = april_tags::localize(&self.april_tags.read());
+                let current_april_tags = self.april_tags.read().await;
+                let april_tags_pose = april_tags::localize(current_april_tags.as_ref().unwrap());
+                drop(current_april_tags);
                 drop(april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
-                    // TODO: impl kalman filter
                     let final_pose = april_tags_pose;
                     let client = Arc::clone(&self.client);
                     let service_request =

@@ -1,0 +1,5 @@
+[0.031s] Invoking command in '.': /home/admin/.cargo/bin/cargo ament-build --install-base /workspaces/isaac_ros-dev/src/pixelization_rs/install/pixelization_rs -- --manifest-path /workspaces/isaac_ros-dev/src/pixelization_rs/Cargo.toml --target-dir /workspaces/isaac_ros-dev/src/pixelization_rs/build/pixelization_rs --quiet
+[1.167s] [1m[31merror[0m[1m:[0m no matching package named `builtin_interfaces` found
+[1.168s] location searched: registry `crates-io`
+[1.168s] required by package `ros2_logger v0.1.0 (/workspaces/isaac_ros-dev/src/pixelization_rs/ros2_logger)`
+[1.175s] Invoked command in '.' returned '1': /home/admin/.cargo/bin/cargo ament-build --install-base /workspaces/isaac_ros-dev/src/pixelization_rs/install/pixelization_rs -- --manifest-path /workspaces/isaac_ros-dev/src/pixelization_rs/Cargo.toml --target-dir /workspaces/isaac_ros-dev/src/pixelization_rs/build/pixelization_rs --quiet

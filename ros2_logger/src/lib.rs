@@ -3,7 +3,11 @@
 //! It uses the ros2 log subscriber to publish logs.
 //!
 //! ```rust
-//! ros2_logger::Ros2Logger::new().env().init().unwrap();
+//! use std::sync::Arc;
+//!
+//! let context = rclrs::Context::new(std::env::args())?;
+//! let node = Arc::new(rclrs::Node::new(&context, "test")?);
+//! ros2_logger::Ros2Logger::new(Arc::clone(&node)).env().init().unwrap();
 //!
 //! log::warn!("This is an example message.");
 //! ```
@@ -13,19 +17,31 @@
 //! Just initialize logging without any configuration:
 //!
 //! ```rust
-//! ros2_logger::init().unwrap();
+//! use std::sync::Arc;
+//!
+//! let context = rclrs::Context::new(std::env::args())?;
+//! let node = Arc::new(rclrs::Node::new(&context, "test")?);
+//! ros2_logger::Ros2Logger::new(Arc::clone(&node)).env().init().unwrap();
 //! ```
 //!
 //! Set the log level from the `RUST_LOG` environment variable:
 //!
 //! ```rust
-//! ros2_logger::init_with_env().unwrap();
+//! use std::sync::Arc;
+//!
+//! let context = rclrs::Context::new(std::env::args())?;
+//! let node = Arc::new(rclrs::Node::new(&context, "test")?);
+//! ros2_logger::init_with_env(Arc::clone(&node)).unwrap();
 //! ```
 //!
 //! Hardcode a default log level:
 //!
 //! ```rust
-//! ros2_logger::init_with_level(log::Level::Warn).unwrap();
+//! use std::sync::Arc;
+//!
+//! let context = rclrs::Context::new(std::env::args())?;
+//! let node = Arc::new(rclrs::Node::new(&context, "test")?);
+//! ros2_logger::init_with_level(Arc::clone(&node), log::Level::Warn).unwrap();
 //! ```
 
 use std::str::FromStr;
@@ -50,7 +66,7 @@ pub struct Ros2Logger {
     /// vector for the first match to give us the desired log level for a module.
     module_levels: Vec<(String, LevelFilter)>,
     ros_out_publisher: std::sync::Arc<rclrs::Publisher<rcl_interfaces::msg::Log>>,
-    clock: rclrs::Clock,
+    clock: Clock,
 }
 
 impl Ros2Logger {
@@ -58,7 +74,10 @@ impl Ros2Logger {
     /// default log level set to `Level::Trace`.
     ///
     /// ```no_run
+    /// use std::env;
+    /// use std::sync::Arc;
     /// use ros2_logger::Ros2Logger;
+    ///
     /// let context = rclrs::Context::new(env::args())?;
     /// let node = rclrs::create_node(&context, "minimal_node")?;
     /// Ros2Logger::new(Arc::clone(&node)).env().init().unwrap();
@@ -93,7 +112,7 @@ impl Ros2Logger {
         self.default_level = std::env::var("RUST_LOG")
             .ok()
             .as_deref()
-            .map(log::LevelFilter::from_str)
+            .map(LevelFilter::from_str)
             .and_then(Result::ok)
             .unwrap_or(self.default_level);
 
@@ -102,7 +121,7 @@ impl Ros2Logger {
 
     /// Set the 'default' log level.
     ///
-    /// You can override the default level for specific modules and their sub-modules using [`with_module_level`]
+    /// You can override the default level for specific modules and their submodules using [`with_module_level`]
     ///
     /// This must be called before [`env`]. If called after [`env`], it will override the value loaded from the environment.
     ///
@@ -116,8 +135,8 @@ impl Ros2Logger {
 
     /// Override the log level for some specific modules.
     ///
-    /// This sets the log level of a specific module and all its sub-modules.
-    /// When both the level for a parent module as well as a child module are set,
+    /// This sets the log level of a specific module and all its submodules.
+    /// When both the level for a parent module and a child module are set,
     /// the more specific value is taken. If the log level for the same module is
     /// specified twice, the resulting log level is implementation defined.
     ///
@@ -125,20 +144,26 @@ impl Ros2Logger {
     ///
     /// Silence an overly verbose crate:
     ///
-    /// ```no_run
+    /// ```
+    /// use std::sync::Arc;
     /// use ros2_logger::Ros2Logger;
     /// use log::LevelFilter;
     ///
-    /// Ros2Logger::new().with_module_level("chatty_dependency", LevelFilter::Warn).init().unwrap();
+    /// let context = rclrs::Context::new(std::env::args())?;
+    /// let node = Arc::new(rclrs::Node::new(&context, "test")?);
+    /// Ros2Logger::new(Arc::clone(&node)).with_module_level("chatty_dependency", LevelFilter::Warn).init().unwrap();
     /// ```
     ///
     /// Disable logging for all dependencies:
     ///
-    /// ```no_run
+    /// ```
+    /// use std::sync::Arc;
     /// use ros2_logger::Ros2Logger;
     /// use log::LevelFilter;
     ///
-    /// Ros2Logger::new()
+    /// let context = rclrs::Context::new(std::env::args())?;
+    /// let node = Arc::new(rclrs::Node::new(&context, "test")?);
+    /// Ros2Logger::new(Arc::clone(&node))
     ///     .with_level(LevelFilter::Off)
     ///     .with_module_level("my_crate", LevelFilter::Info)
     ///     .init()
@@ -221,7 +246,7 @@ impl Log for Ros2Logger {
             log.msg = record.args().to_string();
             log.name = record.target().to_string();
             log.file = record.file().unwrap_or_default().to_string();
-            log.line = record.line().unwrap_or_default() as u32;
+            log.line = record.line().unwrap_or_default();
             let res = self.ros_out_publisher.publish(&log);
             if let Err(e) = res {
                 eprintln!("Failed to publish log: {}", e);
