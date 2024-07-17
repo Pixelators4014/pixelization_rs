@@ -3,5 +3,6 @@
   "version": "0.1.0",
   "image": "pixelization",
   "build.context": "..",
-  "runArgs": ["-v $HOME/workspaces/isaac_ros-dev:/workspaces/isaac_ros-dev", "-e NVIDIA_VISIBLE_DEVICES=all", "--network host", "-v /dev/*:/dev/*", "-v /etc/localtime:/etc/localtime:ro", "--runtime nvidia", "--workdir /workspaces/isaac_ros-dev"]
+  "workspaceFolder": "/workspaces/isaac_ros-dev/src/pixelization_rs",
+  "runArgs": ["-e NVIDIA_VISIBLE_DEVICES=all", "--runtime=nvidia", "--privileged"]
 }

@@ -18,7 +18,7 @@ pub struct NetworkNode {
     pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
-    pub april_tags_receiver: Mutex<watch::Receiver<AprilTagDetectionArray>>,
+    pub april_tags_receiver: Mutex<watch::Receiver<chrono::DateTime<chrono::Utc>>>,
 }
 
 impl NetworkNode {
@@ -46,8 +46,8 @@ impl NetworkNode {
 
 
         // Setup send channel
-        let blank_detection_array = AprilTagDetectionArray::default();
-        let (tx, rx) = watch::channel(blank_detection_array);
+        let now = chrono::Utc::now();
+        let (tx, rx) = watch::channel(now);
 
         let april_tags = Arc::new(RwLock::new(None));
         let april_tags_subscription = node.create_subscription(
@@ -56,9 +56,8 @@ impl NetworkNode {
             {
                 let april_tags_cb = Arc::clone(&april_tags);
                 move |msg: AprilTagDetectionArray| {
-                    // TODO: send a timestamp into the channel instead
                     *april_tags_cb.blocking_write() = Some(msg.clone());
-                    tx.send(msg).unwrap();
+                    tx.send(chrono::Utc::now()).unwrap();
                 }
             }
         )?;
@@ -120,7 +119,7 @@ impl NetworkNode {
             if rx.has_changed().unwrap() {
                 let april_tags = rx.borrow_and_update();
                 trace!("April Tags: {april_tags:?}");
-                let april_tags_pose = april_tags::localize(&april_tags);
+                let april_tags_pose = april_tags::localize(&self.april_tags.read());
                 drop(april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");
