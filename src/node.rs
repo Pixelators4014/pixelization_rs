@@ -15,7 +15,7 @@ pub struct NetworkNode {
     pub path_subscription: Arc<rclrs::Subscription<PathMsg>>,
     #[allow(dead_code)]
     pub april_tags_subscription: Arc<rclrs::Subscription<AprilTagDetectionArray>>,
-    pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+    pub client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub april_tags: Arc<RwLock<Option<AprilTagDetectionArray>>>,
     pub april_tags_receiver: Mutex<watch::Receiver<AprilTagDetectionArray>>,
@@ -25,21 +25,23 @@ impl NetworkNode {
     pub fn new(context: &rclrs::Context) -> Result<Self, rclrs::RclrsError> {
         let node = rclrs::Node::new(context, "network_node")?;
 
-        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>(
+        let client = node.create_client::<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>(
             "visual_slam/set_odometry_pose",
         )?;
 
         let path = Arc::new(RwLock::new(None));
-        let path_cb = Arc::clone(&path);
         let path_subscription =
             // Create a new shared pointer instance that will be owned by the closure
             node.create_subscription(
                 "/visual_slam/tracking/slam_path",
                 rclrs::QOS_PROFILE_DEFAULT,
-                move |msg: PathMsg| {
-                    // This subscription now owns the data_cb variable
-                    *path_cb.blocking_write() = Some(msg);
-                },
+                {
+                    let path_cb = Arc::clone(&path);
+                    move |msg: PathMsg| {
+                        // This subscription now owns the data_cb variable
+                        *path_cb.blocking_write() = Some(msg);
+                    }
+                }
             )?;
 
 
@@ -48,15 +50,17 @@ impl NetworkNode {
         let (tx, rx) = watch::channel(blank_detection_array);
 
         let april_tags = Arc::new(RwLock::new(None));
-        let april_tags_cb = Arc::clone(&april_tags);
         let april_tags_subscription = node.create_subscription(
             "/tag_detections",
             rclrs::QOS_PROFILE_DEFAULT,
-            move |msg: AprilTagDetectionArray| {
-                // TODO: send a timestamp into the channel instead
-                *april_tags_cb.blocking_write() = Some(msg.clone());
-                tx.send(msg).unwrap();
-            },
+            {
+                let april_tags_cb = Arc::clone(&april_tags);
+                move |msg: AprilTagDetectionArray| {
+                    // TODO: send a timestamp into the channel instead
+                    *april_tags_cb.blocking_write() = Some(msg.clone());
+                    tx.send(msg).unwrap();
+                }
+            }
         )?;
         Ok(Self {
             node,
@@ -124,7 +128,7 @@ impl NetworkNode {
                     let final_pose = april_tags_pose;
                     let client = Arc::clone(&self.client);
                     let service_request =
-                        isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                        isaac_ros_visual_slam_interfaces::srv::SetSlamPose_Request {
                             pose: geometry_msgs::msg::Pose {
                                 position: geometry_msgs::msg::Point {
                                     x: final_pose.translation.x as f64,

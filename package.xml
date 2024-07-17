@@ -20,7 +20,6 @@
 
     <depend>rclrs</depend>
     <depend>rosidl_runtime_rs</depend>
-    <depend>realsense2_camera</depend>
 
     <export>
         <build_type>ament_cargo</build_type>

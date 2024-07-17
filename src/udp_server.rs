@@ -150,14 +150,14 @@ struct Packet {
 
 pub struct Server {
     data: Arc<RwLock<Option<PathMsg>>>,
-    client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+    client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
     socket: Arc<UdpSocket>,
 }
 
 impl Server {
     pub async fn new(
         data: Arc<RwLock<Option<PathMsg>>>,
-        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
     ) -> Self {
         if let Ok(socket) = UdpSocket::bind(SocketAddr::new(HOST, PORT)).await {
             Self {
@@ -177,7 +177,7 @@ impl Server {
 
     async fn process_request(
         data: Arc<RwLock<Option<PathMsg>>>,
-        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
         request: Request,
     ) -> Response {
         trace!("Request: {request:?}");
@@ -220,7 +220,7 @@ impl Server {
                     UnitQuaternion::from_euler_angles(pose.roll, pose.pitch, pose.yaw);
                 let quaternion = unit_quaternion.quaternion();
                 let service_request =
-                    isaac_ros_visual_slam_interfaces::srv::SetOdometryPose_Request {
+                    isaac_ros_visual_slam_interfaces::srv::SetSlamPose_Request {
                         pose: geometry_msgs::msg::Pose {
                             position: geometry_msgs::msg::Point {
                                 x: pose.x as f64,
@@ -260,7 +260,7 @@ impl Server {
 
     pub async fn handle_bytes(
         data: Arc<RwLock<Option<PathMsg>>>,
-        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetOdometryPose>>,
+        client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
         bytes: &Vec<u8>,
     ) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
