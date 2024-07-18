@@ -259,7 +259,7 @@ impl Server {
                 }
             }
             Request::GetDetections => {
-                // TODO: Fix (actually return detections somehow)
+                // TODO: Fix (actually return detections)
                 Response::Success
             }
         };
