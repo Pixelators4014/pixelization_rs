@@ -1,6 +1,14 @@
 # Pixelization
 
-A ROS2 node that collects data from VSLAM and april tags and processes it for the RobotRIO.
+A ROS2 node that collects data from VSLAM and april tags and processes it for the RobotRIO. This allows a NVIDIA coprocesser to act as a localizer for the robot.
+
+## System Requirements
+
+An Orin Nano with 8GB of ram is the minimum supported system.
+Jetson Nanos likely will suffer from degraded performance.
+It is highly recommended that a NVME SSD is installed on the Orin Nano for maximum performance.
+A webcam or camera of some sort is required to be connected to the Orin Nano.
+Intel Realsense cameras help improve accuracy due to an internal IMU (with the right models) and stereo vision.
 
 ## Requirements
 
