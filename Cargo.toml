@@ -1,4 +1,3 @@
-workspace = { members = ["ros2_logger"] }
 [package]
 name = "pixelization_rs"
 version = "0.1.0"
@@ -18,7 +17,7 @@ async-trait = "0.1"
 clap = { version = "4", features = ["derive"] }
 chrono = "0.4"
 log = "0.4"
-ros2_logger = { path = "ros2_logger" }
+ros2_logger = { git = "https://github.com/Pixelators4014/ros2_logger.git", branch = "main" }
 nalgebra = "*"
 tokio = { version = "1", features = ["full"] }
 lazy_static = "1.4.0"
