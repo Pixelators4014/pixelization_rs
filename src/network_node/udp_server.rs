@@ -65,27 +65,28 @@ impl Pose {
 }
 
 #[derive(Error, Debug)]
+#[repr(u16)]
 pub enum ServerError {
-    #[error("Request too short, expected at least 1 byte.")]
-    TooShort,
-    #[error("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).")]
-    TooShortForSetVslamPose,
-    #[error("Unknown request first byte: {0}")]
-    UnknownFirstByte(u8),
-    #[error("Failed to parse pose: {0}")]
-    PoseError(#[from] PoseParseError),
     #[error("I/O error: {0}")]
-    IoError(#[from] io::Error),
+    IoError(#[from] io::Error) = 100,
     #[error("Failed due to rclrs error (probably a ros2 failure): {0}")]
-    RclrsError(#[from] RclrsError),
+    RclrsError(#[from] RclrsError) = 101,
+    #[error("Unknown request first byte: {0}")]
+    UnknownFirstByte(u8) = 200,
+    #[error("Request too short, expected at least 1 byte.")]
+    TooShort = 201,
+    #[error("Failed to parse pose: {0}")]
+    PoseError(#[from] PoseParseError) = 202,
+    #[error("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).")]
+    TooShortForSetVslamPose = 203,
     #[error("Unexpected server shutdown/panic")]
-    ServerShutdown,
+    ServerShutdown = 300,
     #[error("No vslam data in path")]
-    NoVslamData,
+    NoVslamData = 400,
     #[error("No path recieved")]
-    NoVslamPath,
+    NoVslamPath = 401,
     #[error("Failed to set slam pose due to service error")]
-    SetSlamPoseServiceError
+    SetSlamPoseServiceError = 402
 }
 #[derive(Copy, Clone, Debug)]
 enum Request {
@@ -128,9 +129,14 @@ impl Response {
                 bytes.to_vec()
             }
             Self::Error(msg) => {
+                let d = unsafe { <*const ServerError>::from(msg).cast::<u16>().read() };
+                let d_bytes = d.to_le_bytes();
+                let msg = format!("{:?}", msg);
                 let mut bytes = [0u8; 1024];
                 bytes[0] = 1;
-                bytes[1..msg.len() + 1].copy_from_slice(format!("{:?}", msg).as_bytes());
+                bytes[1] = d_bytes[0];
+                bytes[2] = d_bytes[1];
+                bytes[3..msg.len() + 3].copy_from_slice(msg.as_bytes());
                 bytes.to_vec()
             }
             Self::Pose(pose) => {
