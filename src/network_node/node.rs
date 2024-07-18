@@ -1,13 +1,12 @@
 use log::info;
 use std::sync::Arc;
 use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
-use tokio::sync::{oneshot, watch, Mutex, RwLock};
+use tokio::sync::{oneshot, RwLock};
 
 use crate::task::Task;
 use crate::task;
 use nav_msgs::msg::Path as PathMsg;
 use rclrs::Client;
-use tokio::join;
 
 #[derive(Clone)]
 pub struct TaskContext {

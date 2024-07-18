@@ -1,7 +1,6 @@
 use crate::node::{Parameters, TaskContext};
 use crate::task::Task;
 use async_trait::async_trait;
-use isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray;
 use log::{debug, warn};
 use nav_msgs::msg::Path as PathMsg;
 use std::sync::Arc;
