@@ -112,11 +112,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    localizer_node = Node(
+        name='pixelization',
+        namespace='',
+        package='pixelization_rs',
+        executable='localizer',
+    )
+
     comms_node = Node(
         name='pixelization',
         namespace='',
         package='pixelization_rs',
-        executable='main',
+        executable='network_node',
     )
 
-    return launch.LaunchDescription([isaac_container, realsense_camera_node, comms_node])
+    return launch.LaunchDescription([isaac_container, realsense_camera_node, localizer_node, comms_node])
