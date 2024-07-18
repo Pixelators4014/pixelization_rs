@@ -3,3 +3,5 @@
 /Cargo.lock
 /usr
 log/*
+install/*
+build/*
