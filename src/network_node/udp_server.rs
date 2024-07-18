@@ -14,6 +14,7 @@ use nalgebra::{Quaternion, Rotation3, UnitQuaternion};
 use log::{debug, error, info, trace, warn};
 
 use nav_msgs::msg::Path as PathMsg;
+use rclrs::RclrsError;
 
 const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
 const PORT: u16 = 5800;
@@ -75,10 +76,17 @@ pub enum ServerError {
     PoseError(#[from] PoseParseError),
     #[error("I/O error: {0}")]
     IoError(#[from] io::Error),
+    #[error("Failed due to rclrs error (probably a ros2 failure): {0}")]
+    RclrsError(#[from] RclrsError),
     #[error("Unexpected server shutdown/panic")]
     ServerShutdown,
+    #[error("No vslam data in path")]
+    NoVslamData,
+    #[error("No path recieved")]
+    NoVslamPath,
+    #[error("Failed to set slam pose due to service error")]
+    SetSlamPoseServiceError
 }
-
 #[derive(Copy, Clone, Debug)]
 enum Request {
     GetVslamPose,
@@ -106,11 +114,10 @@ impl Request {
     }
 }
 
-#[derive(Clone)]
 enum Response {
     Pose(Pose),
     Success,
-    Error(String), // TODO: ServerError instead
+    Error(ServerError),
 }
 
 impl Response {
@@ -123,7 +130,7 @@ impl Response {
             Self::Error(msg) => {
                 let mut bytes = [0u8; 1024];
                 bytes[0] = 1;
-                bytes[1..msg.len() + 1].copy_from_slice(msg.as_bytes());
+                bytes[1..msg.len() + 1].copy_from_slice(format!("{:?}", msg).as_bytes());
                 bytes.to_vec()
             }
             Self::Pose(pose) => {
@@ -209,13 +216,11 @@ impl Server {
                         Response::Pose(response.into())
                     } else {
                         warn!("No VSLAM data received, vslam might still being initializing");
-                        Response::Error(
-                            "Server Error: No VSLAM data, please wait or check logs".to_string(),
-                        )
+                        Response::Error(ServerError::NoVslamData)
                     }
                 } else {
                     warn!("No VSLAM data received");
-                    Response::Error("Server Error: No VSLAM data".to_string())
+                    Response::Error(ServerError::NoVslamPath)
                 }
             }
             Request::SetVslamPose(pose) => {
@@ -244,17 +249,12 @@ impl Server {
                             Response::Success
                         } else {
                             warn!("Failed to set VSLAM pose due to service error: {service_request:?}");
-                            Response::Error(
-                                "Server Error: Failed to set VSLAM pose (service error)"
-                                    .to_string(),
-                            )
+                            Response::Error(ServerError::SetSlamPoseServiceError)
                         }
                     }
                     Err(e) => {
                         warn!("Failed to set VSLAM pose due to rcl error: {e}");
-                        Response::Error(format!(
-                            "Server Error: Failed to set VSLAM pose (rcl error): {e}"
-                        ))
+                        Response::Error(ServerError::RclrsError(e))
                     }
                 }
             }
@@ -277,7 +277,7 @@ impl Server {
                 .to_bytes(),
             Err(e) => {
                 warn!("Invalid Request: {e:?}");
-                Response::Error(format!("Invalid Request: {e:?}")).to_bytes()
+                Response::Error(e).to_bytes()
             }
         }
     }

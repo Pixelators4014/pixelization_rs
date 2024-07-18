@@ -1,4 +1,3 @@
-
 # TODO: only delete pixelation containers
 docker ps --filter status=exited -q | xargs docker rm
 
