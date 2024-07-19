@@ -1,6 +1,6 @@
 # Pixelization
 
-A ROS2 node that collects data from VSLAM and april tags and processes it for the RobotRIO. This allows a NVIDIA coprocesser to act as a localizer for the robot.
+A ROS2 package that collects data from VSLAM and april tags and processes it for the RobotRIO. This allows a NVIDIA coprocesser to act as a localizer for the robot.
 
 ## System Requirements
 
