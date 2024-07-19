@@ -52,19 +52,17 @@ RUN git clone https://github.com/IntelRealSense/realsense-ros --depth 1
 # COPY /opt/nvidia/nsight-systems-cli /opt/nvidia/nsight-systems-cli
 # COPY /opt/nvidia/vpi2 /opt/nvidia/vpi2
 # COPY /usr/share/vpi2 /usr/share/vpi2
+RUN rm -rf /workspace/isaac_ros-dev/install && rm -rf /workspaces/isaac_ros-dev/build
+RUN vcs import . < ros2_rust/ros2_rust_humble.repos
+RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
+RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
 
 COPY . pixelization_rs
 
 WORKDIR /workspaces/isaac_ros-dev
 
 # Build the ROS workspace
-RUN vcs import src < src/ros2_rust/ros2_rust_humble.repos
-RUN rm -rf /workspaces/isaac_ros-dev/install && rm -rf /workspaces/isaac_ros-dev/build
-RUN . /opt/ros/humble/setup.bash && . ~/.cargo/env && colcon build --symlink-install --packages-up-to pixelization_rs
-RUN echo '. /opt/ros/humble/setup.bash' >> ~/.bashrc
-RUN echo '. /workspaces/isaac_ros-dev/install/setup.bash' >> ~/.bashrc
-
-RUN cd src/pixelization_rs && . /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && . ~/.cargo/env && cargo build -r
+RUN bash /workspaces/isaac_ros-dev/src/pixelization_rs/_ros_build.bash
 
 # TODO: Add the entrypoint
 CMD [ "/bin/bash", "-c", ". /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && source /workspaces/isaac_ros-dev/src/pixelization_rs/docker_entrypoint.sh" ]

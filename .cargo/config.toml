@@ -1,1 +1,50 @@
-[patch.crates-io]
+[patch.crates-io.visualization_msgs]
+path = "/workspaces/isaac_ros-dev/install/visualization_msgs/share/visualization_msgs/rust"
+
+[patch.crates-io.test_msgs]
+path = "/workspaces/isaac_ros-dev/install/test_msgs/share/test_msgs/rust"
+
+[patch.crates-io.action_msgs]
+path = "/workspaces/isaac_ros-dev/install/action_msgs/share/action_msgs/rust"
+
+[patch.crates-io.unique_identifier_msgs]
+path = "/workspaces/isaac_ros-dev/install/unique_identifier_msgs/share/unique_identifier_msgs/rust"
+
+[patch.crates-io.sensor_msgs]
+path = "/workspaces/isaac_ros-dev/install/sensor_msgs/share/sensor_msgs/rust"
+
+[patch.crates-io.nav_msgs]
+path = "/workspaces/isaac_ros-dev/install/nav_msgs/share/nav_msgs/rust"
+
+[patch.crates-io.isaac_ros_visual_slam_interfaces]
+path = "/workspaces/isaac_ros-dev/install/isaac_ros_visual_slam_interfaces/share/isaac_ros_visual_slam_interfaces/rust"
+
+[patch.crates-io.isaac_ros_apriltag_interfaces]
+path = "/workspaces/isaac_ros-dev/install/isaac_ros_apriltag_interfaces/share/isaac_ros_apriltag_interfaces/rust"
+
+[patch.crates-io.diagnostic_msgs]
+path = "/workspaces/isaac_ros-dev/install/diagnostic_msgs/share/diagnostic_msgs/rust"
+
+[patch.crates-io.geometry_msgs]
+path = "/workspaces/isaac_ros-dev/install/geometry_msgs/share/geometry_msgs/rust"
+
+[patch.crates-io.std_msgs]
+path = "/workspaces/isaac_ros-dev/install/std_msgs/share/std_msgs/rust"
+
+[patch.crates-io.pixelization_rs]
+path = "/workspaces/isaac_ros-dev/install/pixelization_rs/share/pixelization_rs/rust"
+
+[patch.crates-io.rclrs]
+path = "/workspaces/isaac_ros-dev/install/rclrs/share/rclrs/rust"
+
+[patch.crates-io.rosgraph_msgs]
+path = "/workspaces/isaac_ros-dev/install/rosgraph_msgs/share/rosgraph_msgs/rust"
+
+[patch.crates-io.rcl_interfaces]
+path = "/workspaces/isaac_ros-dev/install/rcl_interfaces/share/rcl_interfaces/rust"
+
+[patch.crates-io.builtin_interfaces]
+path = "/workspaces/isaac_ros-dev/install/builtin_interfaces/share/builtin_interfaces/rust"
+
+[patch.crates-io.rosidl_runtime_rs]
+path = "/workspaces/isaac_ros-dev/install/rosidl_runtime_rs/share/rosidl_runtime_rs/rust"
