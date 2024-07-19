@@ -1,6 +1,5 @@
 .idea/*
 /target
-/Cargo.lock
 /usr
 log/*
 install/*

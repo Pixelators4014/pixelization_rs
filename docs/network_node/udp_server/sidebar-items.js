@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["HOST","PORT"],"enum":["PoseParseError","Request","Response","ServerError"],"struct":["Packet","Pose","Server"]};

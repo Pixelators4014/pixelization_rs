@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"localizer":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.79.0/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"localizer/positions/struct.APRIL_TAG_LOCATIONS.html\" title=\"struct localizer::positions::APRIL_TAG_LOCATIONS\">APRIL_TAG_LOCATIONS</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
