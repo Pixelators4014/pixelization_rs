@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["rmw"],"struct":["GetMap","GetMap_Request","GetMap_Response","GetPlan","GetPlan_Request","GetPlan_Response","LoadMap","LoadMap_Request","LoadMap_Response","SetMap","SetMap_Request","SetMap_Response"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["CancelGoal","CancelGoal_Request","CancelGoal_Response"]};

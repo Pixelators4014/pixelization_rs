@@ -19,6 +19,7 @@ use rclrs::RclrsError;
 const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
 const PORT: u16 = 5800;
 
+/// This is how the server represents a pose, the representation follows this ordering
 #[derive(Copy, Clone, Debug)]
 struct Pose {
     x: f32,
@@ -288,6 +289,7 @@ impl Server {
         }
     }
 
+    /// This runs the server by having the main packet routing on this loop, and handling the packets to send the response back on a second set of tasks.
     pub async fn run(&self) -> Result<(), ServerError> {
         info!("Listening on {}", self.socket.local_addr()?);
         let (tx, mut rx) = mpsc::channel(128);

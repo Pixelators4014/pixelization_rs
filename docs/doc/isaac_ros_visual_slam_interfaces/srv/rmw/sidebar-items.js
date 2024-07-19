@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["GetAllPoses","GetAllPoses_Request","GetAllPoses_Response","Reset","Reset_Request","Reset_Response","SetSlamPose","SetSlamPose_Request","SetSlamPose_Response"]};

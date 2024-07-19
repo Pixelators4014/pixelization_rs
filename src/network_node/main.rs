@@ -1,13 +1,13 @@
-/// # Pixelization
-/// ## What is this?
-/// This aims to be a "communications" node, it feeds in "odometry" data to vslam
-/// and takes the stuff from vslam and object detection and sets up a UDP server to send it to RobotRIO.
-/// ## Parameters
-/// `object_detection` - (true by default) Enables or disables object detection.
-/// `server` - (true by default) Enables or disables the udp server (useful for debugging only).
-/// ## Tasks
-/// - Ping, which ensures everything is working
-/// - Server, which broadcasts the data out to the world
+//! # Network Node
+//! ## What is this?
+//! This aims to be a "communications" node, it feeds in "odometry" data to vslam
+//! and takes the stuff from vslam and object detection and sets up a UDP server to send it to RobotRIO.
+//! ## Parameters
+//! `object_detection` - (true by default) Enables or disables object detection.
+//! `server` - (true by default) Enables or disables the udp server (useful for debugging only).
+//! ## Tasks
+//! - Ping, which ensures everything is working
+//! - Server, which broadcasts the data out to the world
 
 use std::sync::Arc;
 
@@ -18,7 +18,7 @@ pub mod node;
 mod task;
 pub mod udp_server;
 
-pub use tokio::sync::oneshot;
+use tokio::sync::oneshot;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
 

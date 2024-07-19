@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Trait for types that can be used in a `rclrs::Subscription` and a `rclrs::Publisher`."><title>Message in rosidl_runtime_rs - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="rosidl_runtime_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-e32f0c247825364d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../rosidl_runtime_rs/index.html">rosidl_runtime_rs</a><span class="version">0.4.1</span></h2></div><h2 class="location"><a href="#">Message</a></h2><div class="sidebar-elems"><section><h3><a href="#required-associated-types">Required Associated Types</a></h3><ul class="block"><li><a href="#associatedtype.RmwMsg">RmwMsg</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.from_rmw_message">from_rmw_message</a></li><li><a href="#tymethod.into_rmw_message">into_rmw_message</a></li></ul><h3><a href="#object-safety">Object Safety</a></h3><h3><a href="#implementors">Implementors</a></h3></section><h2><a href="index.html">In crate rosidl_runtime_rs</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../rosidl_runtime_rs/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Trait <a href="index.html">rosidl_runtime_rs</a>::<wbr><a class="trait" href="#">Message</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../src/rosidl_runtime_rs/traits.rs.html#131-147">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub trait Message: <a class="trait" href="https://doc.rust-lang.org/1.79.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/1.79.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> + <a class="trait" href="https://doc.rust-lang.org/1.79.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> + 'static + <a class="trait" href="https://doc.rust-lang.org/1.79.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/1.79.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> {
+    type <a href="#associatedtype.RmwMsg" class="associatedtype">RmwMsg</a>: <a class="trait" href="trait.RmwMessage.html" title="trait rosidl_runtime_rs::RmwMessage">RmwMessage</a>;
+
+    // Required methods
+    fn <a href="#tymethod.into_rmw_message" class="fn">into_rmw_message</a>(msg_cow: <a class="enum" href="https://doc.rust-lang.org/1.79.0/alloc/borrow/enum.Cow.html" title="enum alloc::borrow::Cow">Cow</a>&lt;'_, Self&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.79.0/alloc/borrow/enum.Cow.html" title="enum alloc::borrow::Cow">Cow</a>&lt;'_, Self::<a class="associatedtype" href="trait.Message.html#associatedtype.RmwMsg" title="type rosidl_runtime_rs::Message::RmwMsg">RmwMsg</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.from_rmw_message" class="fn">from_rmw_message</a>(msg: Self::<a class="associatedtype" href="trait.Message.html#associatedtype.RmwMsg" title="type rosidl_runtime_rs::Message::RmwMsg">RmwMsg</a>) -&gt; Self;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Trait for types that can be used in a <code>rclrs::Subscription</code> and a <code>rclrs::Publisher</code>.</p>
+<p><code>rosidl_generator_rs</code> generates two types of messages that implement this trait:</p>
+<ul>
+<li>An “idiomatic” message type, in the <code>${package_name}::msg</code> module</li>
+<li>An “RMW-native” message type, in the <code>${package_name}::msg::rmw</code> module</li>
+</ul>
+<h2 id="idiomatic-message-type"><a class="doc-anchor" href="#idiomatic-message-type">§</a>Idiomatic message type</h2>
+<p>The idiomatic message type aims to be familiar to Rust developers and ROS 2 developers coming
+from <code>rclcpp</code>.
+To this end, it translates the original ROS 2 message into a version that uses idiomatic Rust
+structs: <a href="https://doc.rust-lang.org/1.79.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec"><code>std::vec::Vec</code></a> for sequences and <a href="https://doc.rust-lang.org/1.79.0/alloc/string/struct.String.html" title="struct alloc::string::String"><code>std::string::String</code></a> for strings. All other
+fields are the same as in an RMW-native message.</p>
+<p>This conversion incurs some overhead when reading and publishing messages.</p>
+<p>It’s possible to use the idiomatic type for a publisher and the RMW-native type for a
+corresponding subscription, and vice versa.</p>
+<h2 id="rmw-native-message-type"><a class="doc-anchor" href="#rmw-native-message-type">§</a>RMW-native message type</h2>
+<p>The RMW-native message type aims to achieve higher performance by avoiding the conversion
+step to an idiomatic message.</p>
+<p>It uses the following type mapping:</p>
+<div><table><thead><tr><th>Message field type</th><th>Rust type</th></tr></thead><tbody>
+<tr><td><code>string</code></td><td><a href="struct.String.html" title="struct rosidl_runtime_rs::String"><code>String</code></a></td></tr>
+<tr><td><code>wstring</code></td><td><a href="struct.WString.html" title="struct rosidl_runtime_rs::WString"><code>WString</code></a></td></tr>
+<tr><td><code>string&lt;=N</code>, for example <code>string&lt;=10</code></td><td><a href="struct.BoundedString.html" title="struct rosidl_runtime_rs::BoundedString"><code>BoundedString</code></a></td></tr>
+<tr><td><code>wstring&lt;=N</code>, for example <code>wstring&lt;=10</code></td><td><a href="struct.BoundedWString.html" title="struct rosidl_runtime_rs::BoundedWString"><code>BoundedWString</code></a></td></tr>
+<tr><td><code>T[]</code>, for example <code>int32[]</code></td><td><a href="struct.Sequence.html" title="struct rosidl_runtime_rs::Sequence"><code>Sequence</code></a></td></tr>
+<tr><td><code>T[&lt;=N]</code>, for example <code>int32[&lt;=32]</code></td><td><a href="struct.BoundedSequence.html" title="struct rosidl_runtime_rs::BoundedSequence"><code>BoundedSequence</code></a></td></tr>
+<tr><td><code>T[N]</code>, for example <code>float32[8]</code></td><td>standard Rust arrays</td></tr>
+<tr><td>primitive type, for example <code>float64</code></td><td>corresponding Rust primitive type</td></tr>
+</tbody></table>
+</div><br/>
+<p>The linked Rust types provided by this package are equivalents of types defined in C that are
+used by the RMW layer.</p>
+<p>The API for these types, and the message as a whole, is still memory-safe and as convenient as
+possible.
+For instance, the <a href="struct.Sequence.html" title="struct rosidl_runtime_rs::Sequence"><code>Sequence</code></a> struct that is used for sequences supports
+iteration and all of the functionality of slices. However, it doesn’t have an equivalent of
+<a href="https://doc.rust-lang.org/1.79.0/alloc/vec/struct.Vec.html#method.push" title="method alloc::vec::Vec::push"><code>Vec::push()</code></a>, among others.</p>
+<h3 id="what-does-rmw-native-mean-in-detail"><a class="doc-anchor" href="#what-does-rmw-native-mean-in-detail">§</a>What does “RMW-native” mean in detail?</h3>
+<p>The message can be directly passed to and from the RMW layer because (1) its layout is
+identical to the layout of the type generated by <code>rosidl_generator_c</code> and (2) the dynamic
+memory inside the message is owned by the C allocator.</p>
+<p>The above type mapping, together with a <code>#[repr(C)]</code> annotation on the message, guarantees
+these two properties.</p>
+<p>This means the user of a message does not need to care about memory ownership, because that is
+managed by the relevant functions and trait impls.</p>
+<h3 id="i-need-even-more-detail-please"><a class="doc-anchor" href="#i-need-even-more-detail-please">§</a>I need even more detail, please</h3>
+<p><code>rosidl_runtime_c</code> and the code generated by <code>rosidl_generator_c</code> manages
+memory by means of four functions for each message: <code>init()</code>, <code>fini()</code>, <code>create()</code>, and
+<code>destroy()</code>.</p>
+<p><code>init()</code> does the following:</p>
+<ul>
+<li>for a message, it calls <code>init()</code> on all its members that are of non-primitive type, and applies default values</li>
+<li>for a primitive sequence, it allocates the space requested</li>
+<li>for a string, it constructs a string containing a single null terminator byte</li>
+<li>for a non-primitive sequence, it zero-allocates the space requested and calls <code>init()</code> on all its elements</li>
+</ul>
+<p><code>fini()</code> does the following (which means after a call to <code>fini()</code>, everything inside the message has been deallocated):</p>
+<ul>
+<li>for a message, it calls <code>fini()</code> on all its members that are of non-primitive type</li>
+<li>for a primitive sequence, it deallocates</li>
+<li>for a string, it deallocates</li>
+<li>for a non-primitive sequence, it calls <code>fini()</code> on all its elements, and then deallocates</li>
+</ul>
+<p><code>create()</code> simply allocates space for the message itself, and calls <code>init()</code>.</p>
+<p><code>destroy()</code> simply deallocates the message itself, and calls <code>fini()</code>.</p>
+<p>Memory ownership by C is achieved by calling <code>init()</code> when any string or sequence is created,
+as well as in the <code>Default</code> impl for messages.
+User code can still create messages explicitly, which will not call <code>init()</code>, but this is not a
+problem, since nothing is allocated this way.
+The <code>Drop</code> impl for any sequence or string will call <code>fini()</code>.</p>
+</div></details><h2 id="required-associated-types" class="section-header">Required Associated Types<a href="#required-associated-types" class="anchor">§</a></h2><div class="methods"><details class="toggle" open><summary><section id="associatedtype.RmwMsg" class="method"><a class="src rightside" href="../src/rosidl_runtime_rs/traits.rs.html#133">source</a><h4 class="code-header">type <a href="#associatedtype.RmwMsg" class="associatedtype">RmwMsg</a>: <a class="trait" href="trait.RmwMessage.html" title="trait rosidl_runtime_rs::RmwMessage">RmwMessage</a></h4></section></summary><div class="docblock"><p>The corresponding RMW-native message type.</p>
+</div></details></div><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.into_rmw_message" class="method"><a class="src rightside" href="../src/rosidl_runtime_rs/traits.rs.html#143">source</a><h4 class="code-header">fn <a href="#tymethod.into_rmw_message" class="fn">into_rmw_message</a>(msg_cow: <a class="enum" href="https://doc.rust-lang.org/1.79.0/alloc/borrow/enum.Cow.html" title="enum alloc::borrow::Cow">Cow</a>&lt;'_, Self&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.79.0/alloc/borrow/enum.Cow.html" title="enum alloc::borrow::Cow">Cow</a>&lt;'_, Self::<a class="associatedtype" href="trait.Message.html#associatedtype.RmwMsg" title="type rosidl_runtime_rs::Message::RmwMsg">RmwMsg</a>&gt;</h4></section></summary><div class="docblock"><p>Converts the idiomatic message into an RMW-native message.</p>
+<p>If the idiomatic message is owned, a slightly more efficient conversion is possible.
+This is why the function takes a <code>Cow</code>.</p>
+<p>If this function receives a borrowed message that is already RMW-native, it should
+directly return that borrowed message.
+This is why the return type is also <code>Cow</code>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.from_rmw_message" class="method"><a class="src rightside" href="../src/rosidl_runtime_rs/traits.rs.html#146">source</a><h4 class="code-header">fn <a href="#tymethod.from_rmw_message" class="fn">from_rmw_message</a>(msg: Self::<a class="associatedtype" href="trait.Message.html#associatedtype.RmwMsg" title="type rosidl_runtime_rs::Message::RmwMsg">RmwMsg</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Converts the RMW-native message into an idiomatic message.</p>
+</div></details></div><h2 id="object-safety" class="section-header">Object Safety<a href="#object-safety" class="anchor">§</a></h2><div class="object-safety-info">This trait is <b>not</b> <a href="https://doc.rust-lang.org/1.79.0/reference/items/traits.html#object-safety">object safe</a>.</div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../trait.impl/rosidl_runtime_rs/traits/trait.Message.js" async></script></section></div></main></body></html>

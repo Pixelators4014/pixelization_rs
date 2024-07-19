@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["seq"],"struct":["BoundedSequence","BoundedString","BoundedWString","Sequence","SequenceExceedsBoundsError","String","StringExceedsBoundsError","WString"],"trait":["Message","RmwMessage","SequenceAlloc","Service"]};
