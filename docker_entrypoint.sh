@@ -1,5 +1,4 @@
-ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py &
-cd /workspaces/isaac_ros-dev/src/pixelization_rs/docker_entrypoint.sh
-cargo run -r
+source ~/.bashrc
+. /workspaces/isaac_ros-dev/install/setup.bash
 
-wait
+ros2 launch pixelization run.launch.py

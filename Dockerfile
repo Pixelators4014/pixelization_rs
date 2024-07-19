@@ -37,16 +37,16 @@ RUN git clone https://github.com/ros2-rust/ros2_rust --depth 1
 RUN git clone https://github.com/IntelRealSense/realsense-ros --depth 1
 
 # Copy files (uneeded and will break some systems)
-#COPY /usr/bin/tegrastats /usr/bin/tegrastats
-#COPY /tmp/argus_socket /tmp/argus_socket
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1
-#COPY /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h
+# COPY /usr/bin/tegrastats /usr/bin/tegrastats
+# COPY /tmp/argus_socket /tmp/argus_socket
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1 /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1
+# COPY /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h
 # COPY /usr/lib/aarch64-linux-gnu/tegra /usr/lib/aarch64-linux-gnu/tegra
 # COPY /usr/src/jetson_multimedia_api /usr/src/jetson_multimedia_api
 # COPY /opt/nvidia/nsight-systems-cli /opt/nvidia/nsight-systems-cli
@@ -65,4 +65,4 @@ WORKDIR /workspaces/isaac_ros-dev
 RUN bash /workspaces/isaac_ros-dev/src/pixelization_rs/_ros_build.bash
 
 # TODO: Add the entrypoint
-CMD [ "/bin/bash", "-c", ". /opt/ros/humble/setup.bash && . /workspaces/isaac_ros-dev/install/setup.bash && source /workspaces/isaac_ros-dev/src/pixelization_rs/docker_entrypoint.sh" ]
+CMD [ "/bin/bash", "-c", "source /workspaces/isaac_ros-dev/src/pixelization_rs/docker_entrypoint.sh" ]
