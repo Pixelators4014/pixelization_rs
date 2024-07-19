@@ -46,5 +46,10 @@ source build.sh
 
 Now, to get attach terminal in the container (which will be spun up if needed), simply run `source run_dev.sh`.
 
-Note that devcontainers are supported, and are suggested if you like autocomplete,
+Note that dev containers are supported, and are suggested if you like autocomplete,
 just open the file [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) and your IDE should take care of the rest.
+
+
+# Competition Usage
+
+Use systemd to automatically run `run.sh` on startup, which should start the docker container and execute the entry script.
