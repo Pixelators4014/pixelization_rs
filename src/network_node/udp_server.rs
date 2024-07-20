@@ -16,8 +16,10 @@ use log::{debug, error, info, trace, warn};
 use nav_msgs::msg::Path as PathMsg;
 use rclrs::RclrsError;
 
+// TODO: should be configurable
 const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
 const PORT: u16 = 5800;
+pub const PROTOCOL_VERSION: u16 = 1;
 
 /// This is how the server represents a pose, the representation follows this ordering
 #[derive(Copy, Clone, Debug)]
@@ -76,10 +78,12 @@ pub enum ServerError {
     UnknownFirstByte(u8) = 200,
     #[error("Request too short, expected at least 1 byte.")]
     TooShort = 201,
+    #[error("Unsupported Client Version")]
+    UnsupportedClientVersion = 202,
     #[error("Failed to parse pose: {0}")]
-    PoseError(#[from] PoseParseError) = 202,
+    PoseError(#[from] PoseParseError) = 203,
     #[error("Request too short, expected at least 25 bytes if SetVslamPose is requested (first byte is 1).")]
-    TooShortForSetVslamPose = 203,
+    TooShortForSetVslamPose = 204,
     #[error("Unexpected server shutdown/panic")]
     ServerShutdown = 300,
     #[error("No vslam data in path")]
@@ -94,22 +98,31 @@ enum Request {
     GetVslamPose,
     SetVslamPose(Pose),
     GetDetections,
+    Ping
 }
 
 impl Request {
     fn from_bytes(bytes: &[u8]) -> Result<Self, ServerError> {
-        if bytes.len() < 1 {
+        if bytes.len() < 3 {
             return Err(ServerError::TooShort);
         }
-        return if bytes[0] == 0 {
+
+        let client_protocol_version = u16::from_le_bytes([bytes[0], bytes[1]]);
+        if client_protocol_version > 10 {
+            return Err(ServerError::UnsupportedClientVersion);
+        }
+
+        return if bytes[2] == 0 {
             Ok(Self::GetVslamPose)
-        } else if bytes[0] == 1 {
+        } else if bytes[2] == 1 {
             if bytes.len() < 25 {
                 return Err(ServerError::TooShortForSetVslamPose);
             }
             Ok(Self::SetVslamPose(Pose::from_bytes(&bytes[1..26])?))
-        } else if bytes[0] == 2 {
+        } else if bytes[2] == 2 {
             Ok(Self::GetDetections)
+        } else if bytes[2] == 255 {
+            Ok(Self::Ping)
         } else {
             Err(ServerError::UnknownFirstByte(bytes[0]))
         };
@@ -120,6 +133,7 @@ enum Response {
     Pose(Pose),
     Success,
     Error(ServerError),
+    Version
 }
 
 impl Response {
@@ -144,6 +158,10 @@ impl Response {
                 let mut bytes = [0u8; 32];
                 bytes[0] = 255;
                 bytes[1..25].copy_from_slice(&pose.to_bytes());
+                bytes.to_vec()
+            }
+            Self::Version => {
+                let mut bytes = PROTOCOL_VERSION.to_le_bytes();
                 bytes.to_vec()
             }
         };
@@ -268,6 +286,9 @@ impl Server {
             Request::GetDetections => {
                 // TODO: Fix (actually return detections)
                 Response::Success
+            }
+            Request::Ping => {
+                Response::Version
             }
         };
     }
