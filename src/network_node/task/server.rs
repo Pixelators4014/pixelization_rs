@@ -1,3 +1,4 @@
+use std::net::IpAddr;
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -8,27 +9,26 @@ use tokio::sync::RwLock;
 
 use crate::node::TaskContext;
 use crate::task::Task;
+use crate::udp_server::Server as UdpServer;
 
 pub struct Server {
-    path: Arc<RwLock<Option<PathMsg>>>,
-    set_pose: Arc<Client<SetSlamPose>>,
+    udp_server: UdpServer
 }
 
 impl Server {
-    pub async fn new(context: TaskContext) -> Self {
-        Self {
-            path: context.path,
-            set_pose: context.set_pose,
-        }
+    pub async fn new(context: TaskContext) -> Result<Self, std::io::Error> {
+        let udp_server =
+            UdpServer::new(Arc::clone(&context.path), Arc::clone(&context.set_pose), context.parameters.server_port, context.parameters.server_ip).await?;
+        Ok(Self {
+            udp_server
+        })
     }
 }
 
 #[async_trait]
 impl Task for Server {
     async fn run(&self) {
-        let server =
-            crate::udp_server::Server::new(Arc::clone(&self.path), Arc::clone(&self.set_pose)).await;
-        server.run().await.unwrap();
+        self.udp_server.run().await.unwrap();
         // TODO: Fix
         // self.shutdown_trigger.send(()).unwrap();
     }

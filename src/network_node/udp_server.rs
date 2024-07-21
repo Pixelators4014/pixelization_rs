@@ -18,7 +18,7 @@ use rclrs::RclrsError;
 
 // TODO: should be configurable
 const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
-const PORT: u16 = 5800;
+
 pub const PROTOCOL_VERSION: u16 = 1;
 
 /// This is how the server represents a pose, the representation follows this ordering
@@ -189,25 +189,15 @@ impl Server {
     pub async fn new(
         data: Arc<RwLock<Option<PathMsg>>>,
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
-    ) -> Self {
-        if let Ok(socket) = UdpSocket::bind(SocketAddr::new(HOST, PORT)).await {
-            Self {
-                data,
-                client,
-                socket: Arc::new(socket),
-            }
-        } else {
-            warn!("Failed to bind to static UDP socket");
-            Self {
-                data,
-                client,
-                socket: Arc::new(
-                    UdpSocket::bind(SocketAddr::new("127.0.0.1".parse().unwrap(), PORT))
-                        .await
-                        .unwrap(),
-                ),
-            }
-        }
+        port: u16,
+        ip_addr: IpAddr
+    ) -> io::Result<Self> {
+        let socket = UdpSocket::bind(SocketAddr::new(ip_addr, port)).await?;
+        Ok(Self {
+            data,
+            client,
+            socket: Arc::new(socket),
+        })
     }
 
     async fn process_request(

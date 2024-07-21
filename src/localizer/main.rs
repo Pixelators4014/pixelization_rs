@@ -51,9 +51,10 @@ impl LocalizerNode {
                 let _date = rx.borrow_and_update();
                 drop(_date);
                 let current_april_tags = self.april_tags.read().await;
-                trace!("April Tags: {:?}", current_april_tags.as_ref());
                 let april_tags_pose =
-                    positions::localize(current_april_tags.as_ref().unwrap());
+                    current_april_tags.as_ref()
+                        .map(|o| positions::localize(o))
+                        .flatten();
                 drop(current_april_tags);
                 if let Some(april_tags_pose) = april_tags_pose {
                     info!("Using April Tags Pose: {april_tags_pose:?}");

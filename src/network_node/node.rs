@@ -1,3 +1,5 @@
+use std::net::IpAddr;
+use std::str::FromStr;
 use log::info;
 use std::sync::Arc;
 use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
@@ -22,32 +24,42 @@ pub struct NetworkNode {
     pub task_context: TaskContext,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Parameters {
     pub object_detection: bool,
     pub server: bool,
+    pub server_port: u16,
+    pub server_ip: IpAddr
 }
 
 impl NetworkNode {
     pub async fn new(
         context: &rclrs::Context,
         _shutdown_trigger: oneshot::Sender<()>,
-    ) -> Result<Self, rclrs::RclrsError> {
+    ) -> crate::Result<Self> {
         let node = rclrs::Node::new(context, "network_node")?;
         let param_object_detection = node
             .declare_parameter("object_detection")
             .default(true)
-            .mandatory()
-            .unwrap();
+            .mandatory()?;
         let param_server = node
             .declare_parameter("server")
             .default(true)
-            .mandatory()
-            .unwrap();
+            .mandatory()?;
+        let param_server_ip = node
+            .declare_parameter("server_ip")
+            .default("127.0.0.1")
+            .mandatory()?;
+        let param_server_port = node
+            .declare_parameter("server_port")
+            .default(5800)
+            .mandatory()?;
 
         let parameters = Parameters {
             object_detection: param_object_detection.get(),
             server: param_server.get(),
+            server_port: param_server_port.get() as u16,
+            server_ip: IpAddr::from_str(param_server_ip.get()).unwrap()
         };
 
         let path = Arc::new(RwLock::new(None));
@@ -77,7 +89,7 @@ impl NetworkNode {
         let mut tasks: Vec<Arc<dyn Task>> = vec![];
         tasks.push(Arc::new(task::Ping::new(task_context.clone()).await));
         if parameters.server {
-            tasks.push(Arc::new(task::Server::new(task_context.clone()).await));
+            tasks.push(Arc::new(task::Server::new(task_context.clone()).await?));
         }
 
         Ok(Self {
