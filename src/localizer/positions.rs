@@ -13,7 +13,7 @@ macro_rules! add_april_tag {
                 ($z * 39.37) as f32,
             ),
             nalgebra::geometry::UnitQuaternion::from(
-                nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle as f32),
+                nalgebra::geometry::Rotation3::from_euler_angles(0.0, 0.0, $angle),
             ),
         )
     };
@@ -21,25 +21,26 @@ macro_rules! add_april_tag {
 
 lazy_static! {
     static ref APRIL_TAG_LOCATIONS: Vec<Option<Isometry3<f32>>> = {
-        let mut v = Vec::new();
-        v.push(None);
-        v.push(Some(add_april_tag!(593.68, 9.68, 53.38, 120)));
-        v.push(Some(add_april_tag!(637.21, 34.79, 53.38, 120)));
-        v.push(Some(add_april_tag!(652.73, 196.17, 57.13, 180)));
-        v.push(Some(add_april_tag!(652.73, 218.42, 57.13, 180)));
-        v.push(Some(add_april_tag!(578.77, 323.00, 53.38, 270)));
-        v.push(Some(add_april_tag!(72.5, 323.00, 53.38, 270)));
-        v.push(Some(add_april_tag!(-1.50, 218.42, 57.13, 0)));
-        v.push(Some(add_april_tag!(-1.50, 196.17, 57.13, 0)));
-        v.push(Some(add_april_tag!(14.02, 34.79, 53.38, 60)));
-        v.push(Some(add_april_tag!(57.54, 9.68, 53.38, 60)));
-        v.push(Some(add_april_tag!(468.69, 146.19, 52.00, 300)));
-        v.push(Some(add_april_tag!(468.69, 177.10, 52.00, 60)));
-        v.push(Some(add_april_tag!(441.74, 161.62, 52.00, 180)));
-        v.push(Some(add_april_tag!(441.74, 192.53, 52.00, 180)));
-        v.push(Some(add_april_tag!(414.79, 177.10, 52.00, 180)));
-        v.push(Some(add_april_tag!(414.79, 146.19, 52.00, 180)));
-        v
+        // The id that the april tag is in the vec is the id of the april tag TODO: switch to hashmap
+        vec![
+            None,
+            Some(add_april_tag!(593.68, 9.68, 53.38, 120.0)),
+            Some(add_april_tag!(637.21, 34.79, 53.38, 120.0)),
+            Some(add_april_tag!(652.73, 196.17, 57.13, 180.0)),
+            Some(add_april_tag!(652.73, 218.42, 57.13, 180.0)),
+            Some(add_april_tag!(578.77, 323.00, 53.38, 270.0)),
+            Some(add_april_tag!(72.5, 323.00, 53.38, 270.0)),
+            Some(add_april_tag!(-1.50, 218.42, 57.13, 0.0)),
+            Some(add_april_tag!(-1.50, 196.17, 57.13, 0.0)),
+            Some(add_april_tag!(14.02, 34.79, 53.38, 60.0)),
+            Some(add_april_tag!(57.54, 9.68, 53.38, 60.0)),
+            Some(add_april_tag!(468.69, 146.19, 52.00, 300.0)),
+            Some(add_april_tag!(468.69, 177.10, 52.00, 60.0)),
+            Some(add_april_tag!(441.74, 161.62, 52.00, 180.0)),
+            Some(add_april_tag!(441.74, 192.53, 52.00, 180.0)),
+            Some(add_april_tag!(414.79, 177.10, 52.00, 180.0)),
+            Some(add_april_tag!(414.79, 146.19, 52.00, 180.0)),
+        ]
     };
 }
 
@@ -62,7 +63,7 @@ lazy_static! {
 // 15 182.73 177.10 52.00 120°
 // 16 182.73 146.19 52.00 240°
 
-fn calc_abs_covariance(values: [f64; 36]) -> f32 {
+fn calc_abs_covariance(values: &[f64; 36]) -> f32 {
     let sum = values.iter().sum::<f64>();
     sum.sqrt() as f32
 }
@@ -71,30 +72,28 @@ pub fn localize(detections: &AprilTagDetectionArray) -> Option<Isometry3<f32>> {
     let mut lowest_covariance = f32::MAX;
     let mut best_pose = None;
     for detection in detections.detections.iter() {
-        if let Some(position_option) = APRIL_TAG_LOCATIONS.get(detection.id as usize) {
-            if let Some(position) = position_option {
-                let april_tag_pose = position;
-                let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
-                let inverse_robot_pose = relative_robot_pose.inverse();
-                let absolute_robot_pose = Isometry3::from_parts(
-                    Translation3::from(
-                        april_tag_pose.translation.vector + inverse_robot_pose.translation.vector,
-                    ),
-                    nalgebra::geometry::Rotation3::from_euler_angles(
-                        april_tag_pose.rotation.euler_angles().0
-                            + inverse_robot_pose.rotation.euler_angles().0,
-                        april_tag_pose.rotation.euler_angles().1
-                            + inverse_robot_pose.rotation.euler_angles().1,
-                        april_tag_pose.rotation.euler_angles().2
-                            + inverse_robot_pose.rotation.euler_angles().2,
-                    )
-                        .into(),
-                );
-                let covariance = calc_abs_covariance(detection.pose.pose.covariance);
-                if covariance < lowest_covariance {
-                    best_pose = Some(absolute_robot_pose);
-                    lowest_covariance = covariance;
-                }
+        if let Some(Some(position)) = APRIL_TAG_LOCATIONS.get(detection.id as usize) {
+            let april_tag_pose = position;
+            let relative_robot_pose = crate::util::pose_to_isometry(&detection.pose.pose.pose);
+            let inverse_robot_pose = relative_robot_pose.inverse();
+            let absolute_robot_pose = Isometry3::from_parts(
+                Translation3::from(
+                    april_tag_pose.translation.vector + inverse_robot_pose.translation.vector,
+                ),
+                nalgebra::geometry::Rotation3::from_euler_angles(
+                    april_tag_pose.rotation.euler_angles().0
+                        + inverse_robot_pose.rotation.euler_angles().0,
+                    april_tag_pose.rotation.euler_angles().1
+                        + inverse_robot_pose.rotation.euler_angles().1,
+                    april_tag_pose.rotation.euler_angles().2
+                        + inverse_robot_pose.rotation.euler_angles().2,
+                )
+                    .into(),
+            );
+            let covariance = calc_abs_covariance(&detection.pose.pose.covariance);
+            if covariance < lowest_covariance {
+                best_pose = Some(absolute_robot_pose);
+                lowest_covariance = covariance;
             }
         }
     }

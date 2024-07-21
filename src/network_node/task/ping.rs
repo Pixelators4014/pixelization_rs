@@ -8,14 +8,14 @@ use tokio::sync::RwLock;
 
 pub struct Ping {
     path: Arc<RwLock<Option<PathMsg>>>,
-    parameters: Parameters
+    _parameters: Parameters
 }
 
 impl Ping {
-    pub async fn new(context: TaskContext) -> Self {
+    pub fn new(context: TaskContext) -> Self {
         Self {
             path: context.path,
-            parameters: context.parameters
+            _parameters: context.parameters
         }
     }
 }
@@ -29,7 +29,7 @@ impl Task for Ping {
                 if let Some(path) = path_option.poses.last() {
                     debug!("VSLAM is running: {path:?}");
                 } else {
-                    warn!("VSLAM has not initialized yet")
+                    warn!("VSLAM has not initialized yet");
                 }
             } else {
                 warn!("VSLAM not connected yet");

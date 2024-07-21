@@ -20,6 +20,8 @@ pub mod udp_server;
 
 use tokio::sync::oneshot;
 
+pub use error::Error;
+
 pub type Result<T> = std::result::Result<T, error::Error>;
 
 #[tokio::main]
@@ -31,7 +33,12 @@ async fn main() -> Result<()> {
     info!("Starting Pixelization Node");
 
     network_node.init().await?;
-    let _ = network_node.run_tasks();
+    tokio::task::spawn({
+        let network_node = network_node.clone();
+        async move {
+            network_node.run_tasks().await;
+        }
+    });
 
     std::thread::spawn(move || {
         if let Err(e) = rclrs::spin(Arc::clone(&network_node.node)) {
@@ -40,11 +47,9 @@ async fn main() -> Result<()> {
     });
 
     info!("Pixelization Node Up; Main Loop Idling");
-    if let Ok(_) = rx.await {
-        info!("Pixelization Node Shutting Down on server request.");
-        return Ok(());
-    } else {
-        error!("rx channel closed unexpectedly, waiting on server.");
+    match rx.await {
+        Ok(()) => info!("Pixelization Node Shutting Down on server request."),
+        Err(e) => error!("rx channel closed unexpectedly {e:?}.")
     }
     Ok(())
 }

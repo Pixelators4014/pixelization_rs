@@ -1,11 +1,6 @@
-use std::net::IpAddr;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use isaac_ros_visual_slam_interfaces::srv::SetSlamPose;
-use nav_msgs::msg::Path as PathMsg;
-use rclrs::Client;
-use tokio::sync::RwLock;
 
 use crate::node::TaskContext;
 use crate::task::Task;

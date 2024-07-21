@@ -4,8 +4,8 @@ use thiserror::Error;
 pub enum Error {
     #[error("RCLRS Error: {0}")]
     RCLRS(#[from] rclrs::RclrsError),
-    #[error("Paramter Declaration Error: {0}")]
-    ParameterDeclarationError(#[from] rclrs::DeclarationError),
+    #[error("Paramter Declaration Error: {0:?}")]
+    ParameterDeclarationError(rclrs::DeclarationError),
     #[error("Server Error: {0}")]
     Server(#[from] crate::udp_server::ServerError),
     #[error("I/O Error: {0}")]

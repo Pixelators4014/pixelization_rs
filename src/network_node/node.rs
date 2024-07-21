@@ -8,11 +8,11 @@ use tokio::sync::{oneshot, RwLock};
 use crate::task::Task;
 use crate::task;
 use nav_msgs::msg::Path as PathMsg;
-use rclrs::Client;
+use rclrs::{Client, ParameterRange};
 
 #[derive(Clone)]
 pub struct TaskContext {
-    pub _path_subscription: Arc<rclrs::Subscription<PathMsg>>,
+    _path_subscription: Arc<rclrs::Subscription<PathMsg>>,
     pub path: Arc<RwLock<Option<PathMsg>>>,
     pub set_pose: Arc<Client<SetSlamPose>>,
     pub parameters: Parameters,
@@ -41,25 +41,38 @@ impl NetworkNode {
         let param_object_detection = node
             .declare_parameter("object_detection")
             .default(true)
-            .mandatory()?;
+            .mandatory()
+            .map_err(crate::Error::ParameterDeclarationError)?;
         let param_server = node
             .declare_parameter("server")
             .default(true)
-            .mandatory()?;
+            .mandatory()
+            .map_err(crate::Error::ParameterDeclarationError)?;
         let param_server_ip = node
             .declare_parameter("server_ip")
-            .default("127.0.0.1")
-            .mandatory()?;
+            .default(Arc::from("127.0.0.1"))
+            .mandatory()
+            .map_err(crate::Error::ParameterDeclarationError)?;
+        let port_range = ParameterRange {
+            lower: Some(0),
+            upper: Some(65535),
+            step: None
+        };
         let param_server_port = node
             .declare_parameter("server_port")
+            .range(port_range)
+            .description("The port the server should run on.")
+            .constraints("The port should be number between 0 and 2^16 - 1")
             .default(5800)
-            .mandatory()?;
+            .mandatory()
+            .map_err(crate::Error::ParameterDeclarationError)?;
 
         let parameters = Parameters {
             object_detection: param_object_detection.get(),
             server: param_server.get(),
+            #[allow(clippy::cast_sign_loss)]
             server_port: param_server_port.get() as u16,
-            server_ip: IpAddr::from_str(param_server_ip.get()).unwrap()
+            server_ip: IpAddr::from_str(&param_server_ip.get()).unwrap()
         };
 
         let path = Arc::new(RwLock::new(None));
@@ -87,14 +100,14 @@ impl NetworkNode {
         };
 
         let mut tasks: Vec<Arc<dyn Task>> = vec![];
-        tasks.push(Arc::new(task::Ping::new(task_context.clone()).await));
+        tasks.push(Arc::new(task::Ping::new(task_context.clone())));
         if parameters.server {
             tasks.push(Arc::new(task::Server::new(task_context.clone()).await?));
         }
 
         Ok(Self {
-            tasks,
             node,
+            tasks,
             task_context,
         })
     }
@@ -113,7 +126,6 @@ impl NetworkNode {
         for task in task_futures {
             tasks.push(tokio::task::spawn(async move {
                 task.run().await;
-                ()
             }));
         }
         for task in tasks {

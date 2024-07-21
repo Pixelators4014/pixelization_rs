@@ -1,7 +1,7 @@
 use std::io;
 use std::sync::Arc;
 
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::{IpAddr, SocketAddr};
 
 use tokio::net::UdpSocket;
 use tokio::sync::mpsc;
@@ -15,9 +15,6 @@ use log::{debug, error, info, trace, warn};
 
 use nav_msgs::msg::Path as PathMsg;
 use rclrs::RclrsError;
-
-// TODO: should be configurable
-const HOST: IpAddr = IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1));
 
 pub const PROTOCOL_VERSION: u16 = 1;
 
@@ -55,7 +52,7 @@ impl Pose {
         })
     }
 
-    fn to_bytes(&self) -> [u8; 24] {
+    fn to_bytes(self) -> [u8; 24] {
         let mut bytes = [0u8; 24];
         bytes[0..4].copy_from_slice(&self.x.to_le_bytes());
         bytes[4..8].copy_from_slice(&self.y.to_le_bytes());
@@ -63,7 +60,7 @@ impl Pose {
         bytes[12..16].copy_from_slice(&self.roll.to_le_bytes());
         bytes[16..20].copy_from_slice(&self.pitch.to_le_bytes());
         bytes[20..24].copy_from_slice(&self.yaw.to_le_bytes());
-        return bytes;
+        bytes
     }
 }
 
@@ -112,7 +109,7 @@ impl Request {
             return Err(ServerError::UnsupportedClientVersion);
         }
 
-        return if bytes[2] == 0 {
+        if bytes[2] == 0 {
             Ok(Self::GetVslamPose)
         } else if bytes[2] == 1 {
             if bytes.len() < 25 {
@@ -125,7 +122,7 @@ impl Request {
             Ok(Self::Ping)
         } else {
             Err(ServerError::UnknownFirstByte(bytes[0]))
-        };
+        }
     }
 }
 
@@ -145,12 +142,10 @@ impl Response {
             }
             Self::Error(msg) => {
                 let d = unsafe { <*const ServerError>::from(msg).cast::<u16>().read() };
-                let d_bytes = d.to_le_bytes();
-                let msg = format!("{:?}", msg);
+                let msg = format!("{msg:?}");
                 let mut bytes = [0u8; 1024];
                 bytes[0] = 1;
-                bytes[1] = d_bytes[0];
-                bytes[2] = d_bytes[1];
+                bytes[1..2].copy_from_slice(&d.to_le_bytes());
                 bytes[3..msg.len() + 3].copy_from_slice(msg.as_bytes());
                 bytes.to_vec()
             }
@@ -161,7 +156,9 @@ impl Response {
                 bytes.to_vec()
             }
             Self::Version => {
-                let mut bytes = PROTOCOL_VERSION.to_le_bytes();
+                let mut bytes = [0u8; 3];
+                bytes[0] = 2;
+                bytes[1..2].copy_from_slice(&PROTOCOL_VERSION.to_le_bytes());
                 bytes.to_vec()
             }
         };
@@ -209,29 +206,32 @@ impl Server {
         return match request {
             Request::GetVslamPose => {
                 if let Some(msg) = data.read().await.as_ref() {
-                    if let Some(last) = msg.poses.last() {
-                        info!("Last pose: {last:?}");
-                        let rotation =
-                            Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(
-                                last.pose.orientation.w,
-                                last.pose.orientation.x,
-                                last.pose.orientation.y,
-                                last.pose.orientation.z,
-                            )))
-                            .euler_angles();
-                        let response = Pose {
-                            x: last.pose.position.x as f32,
-                            y: last.pose.position.y as f32,
-                            z: last.pose.position.z as f32,
-                            roll: rotation.0 as f32,
-                            pitch: rotation.1 as f32,
-                            yaw: rotation.2 as f32,
-                        };
-                        trace!("Response: {response:?}");
-                        Response::Pose(response.into())
-                    } else {
-                        warn!("No VSLAM data received, vslam might still being initializing");
-                        Response::Error(ServerError::NoVslamData)
+                    match msg.poses.last() {
+                        Some(last) => {
+                            info!("Last pose: {last:?}");
+                            let rotation =
+                                Rotation3::from(UnitQuaternion::new_normalize(Quaternion::new(
+                                    last.pose.orientation.w,
+                                    last.pose.orientation.x,
+                                    last.pose.orientation.y,
+                                    last.pose.orientation.z,
+                                )))
+                                    .euler_angles();
+                            let response = Pose {
+                                x: last.pose.position.x as f32,
+                                y: last.pose.position.y as f32,
+                                z: last.pose.position.z as f32,
+                                roll: rotation.0 as f32,
+                                pitch: rotation.1 as f32,
+                                yaw: rotation.2 as f32,
+                            };
+                            trace!("Response: {response:?}");
+                            Response::Pose(response)
+                        }
+                        None => {
+                            warn!("No VSLAM data received, vslam might still being initializing");
+                            Response::Error(ServerError::NoVslamData)
+                        }
                     }
                 } else {
                     warn!("No VSLAM data received");
@@ -245,15 +245,15 @@ impl Server {
                 let service_request = isaac_ros_visual_slam_interfaces::srv::SetSlamPose_Request {
                     pose: geometry_msgs::msg::Pose {
                         position: geometry_msgs::msg::Point {
-                            x: pose.x as f64,
-                            y: pose.y as f64,
-                            z: pose.z as f64,
+                            x: f64::from(pose.x),
+                            y: f64::from(pose.y),
+                            z: f64::from(pose.z),
                         },
                         orientation: geometry_msgs::msg::Quaternion {
-                            w: quaternion.coords[3] as f64,
-                            x: quaternion.coords[0] as f64,
-                            y: quaternion.coords[1] as f64,
-                            z: quaternion.coords[2] as f64,
+                            w: f64::from(quaternion.coords[3]),
+                            x: f64::from(quaternion.coords[0]),
+                            y: f64::from(quaternion.coords[1]),
+                            z: f64::from(quaternion.coords[2]),
                         },
                     },
                 };
@@ -286,7 +286,7 @@ impl Server {
     pub async fn handle_bytes(
         data: Arc<RwLock<Option<PathMsg>>>,
         client: Arc<rclrs::Client<isaac_ros_visual_slam_interfaces::srv::SetSlamPose>>,
-        bytes: &Vec<u8>,
+        bytes: &[u8],
     ) -> Vec<u8> {
         let request = Request::from_bytes(bytes);
         match request {
